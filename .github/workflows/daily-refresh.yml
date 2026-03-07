@@ -14,6 +14,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Fetch live commodity prices
+        env:
+          METALS_API_KEY: ${{ secrets.METALS_API_KEY }}
+          EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
+          BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
+        run: python scripts/fetch-prices.py
+
       - name: Update service worker cache version
         run: |
           DATE=$(date +%Y%m%d)
@@ -25,4 +40,5 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git diff --quiet sw.js || (git add sw.js && git commit -m "chore: daily cache refresh $(date +%Y-%m-%d)" && git push)
+          git add data/prices.json sw.js
+          git diff --cached --quiet || (git commit -m "chore: daily price refresh $(date +%Y-%m-%d)" && git push)
