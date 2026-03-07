@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>PMCI — Phila Marine Coatings Index</title>
+<meta name="description" content="Commodity price index dashboard for the marine coatings industry by Phila Coatings">
+<meta name="theme-color" content="#3A913F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PMCI">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="manifest" href="manifest.json">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --navy:#1A1A1A;--dark-blue:#2D2D2D;--med-blue:#3A913F;--light-blue:#E8F5E9;
+  --accent:#4CAF50;--white:#FFF;--light-gray:#F7F8FA;--border:#E2E8F0;
+  --text:#334155;--text-light:#64748B;--green:#16A34A;--red:#DC2626;
+  --phila-green:#3A913F;--phila-dark:#1A1A1A;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--light-gray);color:var(--text);}
+.header{background:linear-gradient(135deg,#1A1A1A,#2D2D2D);color:white;padding:24px 32px;}
+.header-inner{max-width:1440px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;}
+.logo h1{font-size:22px;font-weight:700;letter-spacing:.5px;}
+.logo .sub{font-size:12px;color:#81C784;margin-top:2px;}
+.header-right{text-align:right;font-size:13px;color:#81C784;}
+.main{max-width:1440px;margin:0 auto;padding:24px 32px;}
+.tabs{display:flex;gap:0;background:var(--dark-blue);border-radius:8px 8px 0 0;overflow-x:auto;}
+.tab{padding:12px 22px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;border-bottom:3px solid transparent;transition:all .15s;}
+.tab:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.05);}
+.tab.active{color:white;border-bottom-color:#4CAF50;}
+.panel{display:none;}.panel.active{display:block;}
+.kpi-row{display:flex;gap:10px;margin:16px 0;flex-wrap:wrap;}
+.kpi{background:white;border-radius:10px;padding:14px 18px;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid var(--border);flex:1;min-width:140px;}
+.kpi .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-light);font-weight:600;}
+.kpi .val{font-size:22px;font-weight:700;color:var(--navy);margin-top:2px;}
+.kpi .chg{font-size:11px;font-weight:600;margin-top:1px;}
+.up{color:var(--red);}.down{color:var(--green);}.flat{color:var(--text-light);}
+.ctrl-row{display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap;}
+.btn-group{display:flex;background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden;}
+.btn-g{padding:7px 14px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text-light);text-transform:uppercase;letter-spacing:.3px;transition:all .15s;}
+.btn-g.active{background:#3A913F;color:white;}
+.btn-g:hover:not(.active){background:var(--light-blue);}
+.card{background:white;border-radius:12px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid var(--border);margin-bottom:16px;}
+.card h3{font-size:13px;color:var(--navy);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px;}
+.card .sub-h{font-size:11px;color:var(--text-light);margin-bottom:14px;}
+.card canvas{width:100%!important;}
+.region-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px;}
+.region-card{background:white;border-radius:10px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid var(--border);border-top:4px solid #3A913F;cursor:pointer;transition:box-shadow .15s;}
+.region-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.1);}
+.region-card.sel{border-color:var(--navy);box-shadow:0 0 0 2px var(--navy);}
+.region-card h4{font-size:12px;color:var(--text-light);text-transform:uppercase;letter-spacing:.4px;font-weight:600;}
+.region-card .rv{font-size:26px;font-weight:700;color:var(--navy);margin:4px 0 2px;}
+.region-card .rc{font-size:11px;font-weight:600;}
+.two-col{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:900px){.two-col{grid-template-columns:1fr;}}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{background:var(--navy);color:white;padding:8px 10px;text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:.4px;font-weight:600;}
+th:first-child{text-align:left;border-radius:6px 0 0 0;}
+th:last-child{border-radius:0 6px 0 0;}
+td{padding:7px 10px;border-bottom:1px solid var(--border);text-align:center;font-size:11px;}
+td:first-child{text-align:left;font-weight:600;color:var(--navy);}
+tr:hover{background:var(--light-blue);}
+.wb{display:inline-block;height:5px;border-radius:3px;vertical-align:middle;margin-left:4px;}
+.forecast-badge{display:inline-block;background:#FEF3C7;color:#92400E;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px;margin-left:6px;}
+.source-tag{font-size:9px;color:var(--text-light);font-style:italic;}
+.footer{background:var(--navy);color:rgba(255,255,255,.4);padding:16px 32px;text-align:center;font-size:10px;margin-top:32px;}
+/* Scale controls */
+.scale-ctrl{display:flex;align-items:center;gap:6px;margin-left:auto;}
+.scale-ctrl label{font-size:10px;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:.3px;}
+.scale-ctrl select,.scale-ctrl input{font-size:11px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:white;color:var(--text);font-family:inherit;}
+.scale-ctrl input[type="number"]{width:60px;text-align:center;}
+.scale-ctrl input[type="date"]{width:130px;text-align:center;}
+.scale-btn{padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);border-radius:6px;background:white;color:var(--navy);transition:all .15s;}
+.scale-btn:hover{background:#3A913F;color:white;}
+.chart-wrap{position:relative;}
+.chart-large canvas{height:420px!important;min-height:420px;}
+.chart-med canvas{height:300px!important;min-height:300px;}
+.weight-note{background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;padding:14px 18px;margin-bottom:16px;font-size:12px;line-height:1.6;color:#92400E;}
+.weight-note strong{color:#78350F;}
+
+/* PWA install banner */
+.pwa-install-banner{display:none;position:fixed;bottom:0;left:0;right:0;background:#1A1A1A;color:white;padding:14px 20px;z-index:9999;box-shadow:0 -2px 12px rgba(0,0,0,.3);text-align:center;font-size:13px;}
+.pwa-install-banner button{background:#3A913F;color:white;border:none;border-radius:6px;padding:8px 18px;font-weight:700;font-size:13px;cursor:pointer;margin-left:10px;}
+.pwa-install-banner .dismiss{background:transparent;color:rgba(255,255,255,.6);font-size:12px;margin-left:6px;}
+
+/* Mobile responsive */
+@media(max-width:768px){
+  .header{padding:14px 16px;}
+  .header-inner{flex-direction:column;align-items:flex-start;gap:8px;}
+  .logo h1{font-size:16px;}
+  .logo .sub{font-size:10px;}
+  .logo img{height:36px!important;}
+  .header-right{text-align:left;font-size:11px;}
+  .main{padding:12px 12px;}
+  .tabs{border-radius:0;}
+  .tab{padding:10px 12px;font-size:10px;letter-spacing:.2px;}
+  .region-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .region-card{padding:10px 12px;}
+  .region-card .rv{font-size:20px;}
+  .ctrl-row{flex-direction:column;gap:8px;align-items:stretch;}
+  .btn-group{justify-content:center;}
+  .btn-g{padding:8px 10px;font-size:10px;}
+  .scale-ctrl{flex-wrap:wrap;justify-content:center;margin-left:0!important;gap:4px;}
+  .scale-ctrl label{font-size:9px;}
+  .scale-ctrl input[type="number"]{width:50px;font-size:10px;padding:6px;}
+  .scale-ctrl input[type="date"]{width:115px;font-size:10px;padding:6px;}
+  .scale-btn{padding:6px 10px;font-size:10px;}
+  .card{padding:14px;border-radius:8px;}
+  .card h3{font-size:12px;}
+  .chart-large canvas{height:280px!important;min-height:280px;}
+  .chart-med canvas{height:220px!important;min-height:220px;}
+  table{font-size:10px;}
+  th{padding:6px 4px;font-size:9px;}
+  td{padding:5px 4px;font-size:10px;}
+  .two-col{grid-template-columns:1fr;}
+  .footer{padding:12px 16px;font-size:9px;}
+  .kpi-row{gap:6px;}
+  .kpi{padding:10px 12px;min-width:100px;}
+  .kpi .val{font-size:18px;}
+}
+
+@media(max-width:400px){
+  .region-grid{grid-template-columns:1fr;}
+  .btn-g{padding:8px 8px;font-size:9px;}
+  .chart-large canvas{height:220px!important;min-height:220px;}
+  .chart-med canvas{height:180px!important;min-height:180px;}
+}
+
+/* Touch-friendly: larger tap targets */
+@media(pointer:coarse){
+  .btn-g{min-height:40px;padding:10px 12px;}
+  .scale-btn{min-height:36px;padding:8px 12px;}
+  .tab{min-height:44px;padding:12px 14px;}
+  .scale-ctrl input{min-height:36px;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo" style="display:flex;align-items:center;gap:16px;">
+      <img src="data:image/png;base64,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" alt="Phila Coatings" style="height:50px;">
+      <div>
+        <h1>PMCI — Commodity Index Dashboard</h1>
+        <div class="sub">Phila Marine Coatings Index &nbsp;|&nbsp; <span style="color:#FF6B6B">⚠ IRAN CRISIS UPDATE — Strait of Hormuz Closure</span> &nbsp;|&nbsp; Base Q1 2025 = 100.00</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div id="todayDate"></div>
+      <div style="font-size:11px;color:#FF6B6B;margin-top:2px;">⚠ Crisis pricing — WTI $90.90 (+35% week), Brent $92.50, Hormuz traffic near zero</div>
+    </div>
+  </div>
+</div>
+
+<div class="tabs" id="mainTabs">
+  <div class="tab active" data-tab="overview">Overview</div>
+  <div class="tab" data-tab="forecast">Forecast</div>
+  <div class="tab" data-tab="commodities">Commodities</div>
+  <div class="tab" data-tab="weights">Weights</div>
+  <div class="tab" data-tab="monthly">Monthly Summary</div>
+</div>
+
+<div class="main">
+
+<div class="panel active" id="pan-overview">
+  <div class="region-grid" id="regionCards"></div>
+  <div class="ctrl-row">
+    <div class="btn-group" id="rangeToggle1">
+      <button class="btn-g" data-r="22">1M</button>
+      <button class="btn-g" data-r="66">3M</button>
+      <button class="btn-g" data-r="132">6M</button>
+      <button class="btn-g" data-r="252">1Y</button>
+      <button class="btn-g" data-r="504">2Y</button>
+      <button class="btn-g active" data-r="9999">ALL</button>
+    </div>
+    <div class="scale-ctrl">
+      <label>Y-Axis:</label>
+      <button class="scale-btn" id="scaleZoomIn1" title="Zoom In">+</button>
+      <button class="scale-btn" id="scaleZoomOut1" title="Zoom Out">−</button>
+      <button class="scale-btn" id="scaleAuto1" title="Auto Fit">Auto</button>
+      <label style="margin-left:10px">Min:</label>
+      <input type="number" id="yMin1" placeholder="auto" step="1">
+      <label>Max:</label>
+      <input type="number" id="yMax1" placeholder="auto" step="1">
+      <button class="scale-btn" id="scaleApply1">Apply</button>
+    </div>
+    <div class="scale-ctrl" style="margin-left:0;">
+      <label>X-Axis:</label>
+      <label>From:</label>
+      <input type="date" id="xStart1" value="2023-01-02">
+      <label>To:</label>
+      <input type="date" id="xEnd1" value="2026-03-07">
+      <button class="scale-btn" id="xApply1">Apply</button>
+      <button class="scale-btn" id="xReset1">Reset</button>
+    </div>
+  </div>
+  <div class="card chart-large">
+    <h3>PMCI — All Regions (Historical)</h3>
+    <div class="sub-h">Daily close, Jan 2 2023 – Mar 6 2026 based on market data. Use scale controls to zoom Y-axis.</div>
+    <div class="chart-wrap"><canvas id="allRegionsChart"></canvas></div>
+  </div>
+  <div class="card">
+    <h3>Category Indices — Global</h3>
+    <div class="sub-h">Performance by commodity category (base Q1 2025 = 100)</div>
+    <div class="chart-wrap chart-med"><canvas id="catChart"></canvas></div>
+  </div>
+</div>
+
+<div class="panel" id="pan-forecast">
+  <div class="ctrl-row">
+    <div class="scale-ctrl">
+      <label>Y-Axis:</label>
+      <button class="scale-btn" id="scaleZoomInFC" title="Zoom In">+</button>
+      <button class="scale-btn" id="scaleZoomOutFC" title="Zoom Out">−</button>
+      <button class="scale-btn" id="scaleAutoFC" title="Auto Fit">Auto</button>
+      <label style="margin-left:10px">Min:</label>
+      <input type="number" id="yMinFC" placeholder="auto" step="1">
+      <label>Max:</label>
+      <input type="number" id="yMaxFC" placeholder="auto" step="1">
+      <button class="scale-btn" id="scaleApplyFC">Apply</button>
+    </div>
+    <div class="scale-ctrl" style="margin-left:0;">
+      <label>X-Axis:</label>
+      <label>From:</label>
+      <input type="date" id="xStartFC">
+      <label>To:</label>
+      <input type="date" id="xEndFC">
+      <button class="scale-btn" id="xApplyFC">Apply</button>
+      <button class="scale-btn" id="xResetFC">Reset</button>
+    </div>
+  </div>
+  <div class="card chart-large">
+    <h3>PMCI Forecast — Global + Regions <span class="forecast-badge">30 / 90 / 180 Day</span></h3>
+    <div class="sub-h">Monte Carlo simulation with drift, volatility, and mean-reversion. Shaded bands = 80% confidence interval. Dashed = forecast.</div>
+    <canvas id="forecastChart"></canvas>
+  </div>
+  <div class="card">
+    <h3>Forecast Summary Table</h3>
+    <div class="sub-h">Point estimates with confidence intervals based on 1,000 simulation paths per region</div>
+    <table id="forecastTable"></table>
+  </div>
+  <div class="card">
+    <h3>Key Commodity Forecasts <span class="forecast-badge">180 Day</span></h3>
+    <div class="sub-h">Individual commodity price forecasts driving the index — top movers highlighted</div>
+    <table id="commodityForecastTable"></table>
+  </div>
+  <div class="card">
+    <h3>Forecast Methodology</h3>
+    <div style="font-size:12px;line-height:1.7;color:var(--text);">
+      <p style="margin-bottom:8px"><strong>Model:</strong> Geometric Brownian Motion with Ornstein-Uhlenbeck mean-reversion overlay. <span style="color:#DC2626;font-weight:700">CRISIS RECALIBRATION:</span> Drift and volatility parameters have been sharply increased for oil-linked commodities (solvents, resins, energy) and freight to reflect the Strait of Hormuz closure shock starting Feb 28, 2026.</p>
+      <p style="margin-bottom:8px"><strong>Crisis assumptions:</strong> WTI at $90.90/bbl (+35% in one week — biggest weekly gain in futures history since 1983). Brent at $92.50. Hormuz traffic near zero after IRGC declared strait closed Mar 2. VLCC daily rates +145%. Container rates doubled — Asia-USWC $2,127/FEU, Asia-Europe $2,707/FEU (Maersk, CMA CGM, Hapag-Lloyd suspended transits). Qatar LNG disrupted. EU gas +20–40%. Solvents (xylene, MEK, butyl acetate) spiking 25–45% tracking crude. Petrochemical-derived resins (epoxy, PU, alkyd) up 10–12% on BPA/propylene oxide pass-through.</p>
+      <p style="margin-bottom:8px"><strong>Solvent weighting (revised):</strong> Solvents now weighted at 25% of PMCI (up from 15%), reflecting actual Phila formulation data: Eagle Speed antifouling ~45–50% solvent, PhilaCric alkyd ~55% solvent, PhilaDur epoxy ~26% solvent, PU topcoats ~50% solvent, plus standalone thinner sales (PH 300, PH 400). Weighted average across Phila's marine product range = ~38% solvent by volume.</p>
+      <p style="margin-bottom:8px"><strong>Simulation:</strong> 1,000 Monte Carlo paths per commodity, aggregated through regional weight vectors. Confidence intervals represent 10th–90th percentile (80% band). Bands are substantially wider than pre-crisis due to elevated volatility.</p>
+      <p><strong>Key risk:</strong> If Hormuz remains closed beyond 2 weeks, Qatar's energy minister has warned crude could reach $150/bbl. That scenario would push the PMCI Global index above 135. Conversely, a ceasefire would trigger rapid mean-reversion in freight and solvents (30–60 day lag for chemicals).</p>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="pan-commodities">
+  <div class="card">
+    <h3>Full Commodity Basket — Current Market Prices</h3>
+    <div class="sub-h">Prices as of latest available data (sources noted). Base = Q1 2025 average.</div>
+    <table id="commodityTable"></table>
+  </div>
+</div>
+
+<div class="panel" id="pan-weights">
+  <div class="card" style="overflow-x:auto;">
+    <h3>PMCI Global Commodity Weightings</h3>
+    <div class="sub-h">Fixed-weight Laspeyres basket — 21 commodities across 6 categories. Base period Q1 2025 = 100.</div>
+    <table id="weightTable"></table>
+  </div>
+</div>
+
+<div class="panel" id="pan-monthly">
+  <div class="ctrl-row">
+    <div class="btn-group" id="monthRegionToggle"></div>
+  </div>
+  <div class="card">
+    <h3>Monthly Close &amp; Change by Region</h3>
+    <table id="monthlyTable"></table>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  &copy; 2025–2026 Philadelphia Coatings LLC. PMCI is a proprietary commodity price index. Forecast is modelled, not guaranteed. Sources: LME, ICIS, Intratec, ChemAnalyst, BLS ECI, EIA, Freightos Baltic Index.
+</div>
+
+<script>
+// ============================================================
+// REAL COMMODITY DATA MODEL — REVISED SOLVENT WEIGHTS
+// ============================================================
+// Base = Q1 2025 average. Current = Mar 6 2026 (IRAN CRISIS — Strait of Hormuz closed Feb 28).
+// WTI $90.90 (+35% week — biggest weekly gain in futures history). Brent $92.50. VLCC rates +145%. Container rates doubled.
+// Sources: LME, ICIS, CNBC, NPR, Freightos, Fastmarkets, BLS, EIA.
+//
+// WEIGHT REVISION: Solvents 15% -> 25% based on Phila formulation analysis:
+// - Eagle Speed (antifouling, silyl SPC): ~50% VS = ~50% solvent
+// - PhilaDur 06/08 (epoxy): 74% VS = 26% solvent
+// - PhilaDur Barrier PHE 80: solvent-free (0%)
+// - PhilaGard (tank coatings): ~70% VS = 30% solvent
+// - PhilaCric PHC (alkyd/acrylic): ~45% VS = 55% solvent
+// - PhilaSiloxane (PU topcoat): ~50% VS = 50% solvent
+// - PhilaPhen (phenolic): ~55% VS = 45% solvent
+// - Thinners PH 300, PH 400: 100% solvent (standalone products)
+// Weighted avg across range: ~38% solvent by volume
+// Cost-adjusted weight: 25% (solvents cheaper $/kg than resins, but massive volume)
+//
+const C = [
+  // RESINS & BINDERS (24% total) — 39 months Jan 2023 – Mar 2026
+  {id:1,n:"Epoxy Resin (DGEBA)",u:"USD/MT",gw:0.08,base:3710.0,cur:4250,src:"ICIS/Intratec (BPA/ECH feedstock)",cat:0,
+   drift:0.08,vol:0.25,mr:0.1, monthly:[4200,4150,4080,4000,3950,3920,3900,3880,3860,3820,3780,3700,3650,3620,3600,3620,3650,3680,3700,3680,3650,3620,3600,3650,3680,3700,3750,3780,3800,3820,3840,3850,3840,3830,3820,3840,3850,3830,4250],crisis:true},
+  {id:2,n:"Polyurethane Polyol",u:"USD/MT",gw:0.04,base:2940.0,cur:3350,src:"ICIS/Intratec (propylene oxide)",cat:0,
+   drift:0.08,vol:0.22,mr:0.1, monthly:[3200,3180,3150,3100,3050,3020,3000,2980,2960,2940,2920,2900,2880,2860,2850,2870,2900,2920,2940,2930,2910,2890,2880,2900,2920,2940,2960,2970,2980,2990,3000,3010,3000,2990,2980,2990,3000,2980,3350],crisis:true},
+  {id:3,n:"Alkyd Resin (long oil)",u:"USD/MT",gw:0.04,base:2420.0,cur:2700,src:"Supplier/market (fatty acid/soybean oil)",cat:0,
+   drift:0.06,vol:0.18,mr:0.12, monthly:[2550,2530,2510,2490,2470,2450,2430,2420,2410,2400,2390,2380,2370,2360,2350,2360,2370,2380,2390,2400,2400,2395,2390,2400,2410,2420,2430,2435,2440,2445,2450,2455,2460,2465,2460,2455,2460,2460,2700],crisis:true},
+  {id:4,n:"Acrylic Copolymer (SPC)",u:"USD/MT",gw:0.04,base:3223.33,cur:3600,src:"Supplier (monomer feedstock)",cat:0,
+   drift:0.06,vol:0.2,mr:0.1, monthly:[3400,3380,3350,3320,3280,3250,3230,3210,3200,3190,3180,3170,3160,3150,3140,3150,3160,3180,3200,3210,3200,3190,3180,3200,3210,3220,3240,3260,3280,3300,3310,3320,3330,3340,3350,3360,3370,3360,3600],crisis:true},
+  {id:5,n:"Rosin (WW grade)",u:"USD/MT",gw:0.04,base:1870.0,cur:2050,src:"Market/supplier",cat:0,
+   drift:0.04,vol:0.2,mr:0.1, monthly:[2000,1980,1950,1930,1920,1900,1880,1870,1860,1850,1840,1830,1820,1810,1810,1820,1830,1840,1850,1860,1860,1855,1850,1850,1860,1870,1880,1890,1900,1910,1920,1930,1935,1940,1945,1950,1955,1960,2050],crisis:false},
+  // PIGMENTS & EXTENDERS (18% total)
+  {id:6,n:"Titanium Dioxide (rutile)",u:"USD/MT",gw:0.05,base:2450.0,cur:3150,src:"ICIS/ChemAnalyst (chloride process)",cat:1,
+   drift:0.06,vol:0.18,mr:0.1, monthly:[3400,3350,3300,3250,3200,3150,3100,3050,3000,2950,2900,2850,2800,2750,2700,2680,2650,2630,2600,2550,2500,2480,2450,2420,2400,2450,2500,2550,2600,2650,2680,2700,2720,2750,2780,2750,2780,2750,3150],crisis:true},
+  {id:7,n:"Zinc Dust (fine)",u:"USD/MT",gw:0.04,base:3000.0,cur:3650,src:"LME Zinc + processing",cat:1,
+   drift:0.1,vol:0.28,mr:0.06, monthly:[3400,3150,2900,2750,2500,2380,2520,2500,2620,2560,2600,2580,2530,2480,2500,2750,2900,2850,2900,2800,2900,3000,2950,2980,3000,2950,3050,3100,3150,3200,3200,3100,3150,3200,3150,3100,3200,3100,3650],crisis:true},
+  {id:8,n:"Cuprous Oxide (Cu₂O)",u:"USD/MT",gw:0.03,base:9921.0,cur:13488,src:"LME Cu + processing (Cu content 88.8%)",cat:1,
+   drift:0.18,vol:0.32,mr:0.04, monthly:[9536,9492,9421,9297,8941,8915,9057,8915,8799,8666,8826,9030,9030,9128,9350,10069,10558,10114,9980,9670,9954,10069,9581,9670,9758,9936,10069,10202,10558,10824,11090,11446,11712,12156,12600,13044,13284,12866,13488],crisis:true},
+  {id:9,n:"Iron Oxide (red/yellow)",u:"USD/MT",gw:0.03,base:1208.33,cur:1340,src:"Supplier/market",cat:1,
+   drift:0.04,vol:0.12,mr:0.12, monthly:[1250,1240,1230,1220,1210,1200,1190,1185,1180,1175,1170,1165,1160,1155,1155,1160,1170,1175,1180,1185,1190,1195,1200,1200,1205,1210,1210,1215,1220,1225,1230,1235,1240,1245,1250,1250,1255,1260,1340],crisis:false},
+  {id:10,n:"Zinc Phosphate",u:"USD/MT",gw:0.02,base:2040.0,cur:2482,src:"Supplier (zinc pass-through)",cat:1,
+   drift:0.05,vol:0.14,mr:0.12, monthly:[2312,2142,1972,1870,1700,1618,1714,1700,1782,1741,1768,1754,1720,1686,1700,1870,1972,1938,1972,1904,1972,2040,2006,2026,2040,2006,2074,2108,2142,2176,2176,2108,2142,2176,2142,2108,2176,2108,2482],crisis:true},
+  {id:11,n:"Extenders (CaCO₃/barytes)",u:"USD/MT",gw:0.01,base:275.0,cur:298,src:"Supplier/market",cat:1,
+   drift:0.02,vol:0.06,mr:0.18, monthly:[270,270,268,268,266,265,265,264,264,263,262,262,262,262,263,265,266,267,268,270,270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,298],crisis:false},
+  // SOLVENTS (25% total) — directly petroleum-derived
+  {id:12,n:"Xylene (mixed)",u:"USD/MT",gw:0.1,base:993.33,cur:1430,src:"ICIS/ChemAnalyst (petroleum-derived)",cat:2,
+   drift:0.15,vol:0.4,mr:0.12, monthly:[1050,1020,1000,1030,980,950,980,1010,1040,1020,990,960,980,1000,1010,1030,1000,990,1010,1000,980,960,950,970,990,980,1010,1020,1000,990,1010,1030,1050,1040,1020,1010,1020,1010,1430],crisis:true},
+  {id:13,n:"MEK",u:"USD/MT",gw:0.08,base:1323.33,cur:1820,src:"ICIS/ChemAnalyst (petrochemical)",cat:2,
+   drift:0.12,vol:0.35,mr:0.12, monthly:[1600,1580,1550,1520,1480,1450,1400,1380,1360,1340,1320,1300,1280,1260,1250,1270,1300,1320,1350,1340,1320,1300,1290,1300,1310,1320,1340,1350,1360,1370,1380,1390,1400,1410,1400,1390,1400,1395,1820],crisis:true},
+  {id:14,n:"Butyl Acetate",u:"USD/MT",gw:0.07,base:1290.0,cur:1850,src:"ICIS/ChemAnalyst (acetic acid/butanol)",cat:2,
+   drift:0.14,vol:0.32,mr:0.1, monthly:[1650,1620,1580,1550,1500,1480,1460,1440,1420,1400,1380,1350,1400,1420,1450,1480,1500,1480,1460,1420,1380,1350,1320,1300,1290,1280,1300,1310,1330,1350,1370,1380,1400,1410,1400,1390,1410,1400,1850],crisis:true},
+  // ADDITIVES & BIOCIDES (8% total)
+  {id:15,n:"Isocyanate Hardener (HDI)",u:"USD/MT",gw:0.03,base:4940.0,cur:5400,src:"ICIS/Covestro (petrochemical)",cat:3,
+   drift:0.06,vol:0.2,mr:0.1, monthly:[5800,5750,5700,5650,5600,5550,5500,5450,5400,5350,5300,5250,5200,5180,5160,5140,5120,5100,5080,5060,5040,5020,5000,4980,4960,4940,4920,4900,4880,4860,4840,4820,4800,4790,4780,4800,4810,4810,5400],crisis:true},
+  {id:16,n:"Rheology Modifiers",u:"USD/MT",gw:0.02,base:4820.0,cur:5100,src:"Supplier",cat:3,
+   drift:0.04,vol:0.1,mr:0.12, monthly:[4900,4880,4860,4850,4840,4830,4820,4810,4800,4790,4785,4780,4775,4770,4770,4775,4780,4785,4790,4795,4800,4800,4805,4810,4815,4820,4825,4830,4835,4840,4845,4850,4855,4860,4865,4870,4875,4880,5100],crisis:false},
+  {id:17,n:"Co-Biocides (Zineb/ZPT)",u:"USD/MT",gw:0.03,base:8523.33,cur:9200,src:"Supplier (zinc input + freight)",cat:3,
+   drift:0.05,vol:0.12,mr:0.1, monthly:[8800,8780,8750,8720,8700,8680,8650,8620,8600,8580,8560,8540,8520,8500,8480,8470,8460,8450,8450,8460,8470,8480,8490,8500,8510,8520,8540,8560,8580,8600,8620,8640,8660,8680,8700,8720,8750,8780,9200],crisis:false},
+  // PACKAGING & LOGISTICS (10% total)
+  {id:18,n:"Steel Drums & Cans",u:"Index",gw:0.04,base:100.5,cur:114,src:"BLS PPI Fabricated Metal",cat:4,
+   drift:0.08,vol:0.15,mr:0.08, monthly:[95,95.5,96,96.5,97,97,97.5,97.5,98,98,98,98,98,98,98.5,99,99,99,99,99.5,99.5,99.5,99.5,100,100,100.5,101,101.5,102,103,104,105,105.5,106,106.5,107,107.5,108,114],crisis:true},
+  {id:19,n:"Freight & Shipping",u:"Index",gw:0.06,base:102.33,cur:195,src:"FBX/Baltic Index (Red Sea 2024, Hormuz 2026)",cat:4,
+   drift:0.3,vol:0.45,mr:0.05, monthly:[85,80,78,76,74,72,74,78,80,82,85,110,135,140,130,125,120,115,118,112,108,105,102,100,100,102,105,108,110,112,114,115,116,117,118,118.5,119,119.2,195],crisis:true},
+  // ENERGY & LABOUR (15% total)
+  {id:20,n:"Industrial Energy",u:"Index",gw:0.08,base:100.03,cur:138,src:"EIA/Platts (WTI-linked composite)",cat:5,
+   drift:0.15,vol:0.3,mr:0.08, monthly:[108.7,107.2,101.7,110.5,99.5,98.2,107.7,111.0,124.3,119.0,107.7,99.7,103.2,107.3,111.7,117.3,109.6,112.3,115.3,104.9,99.5,97.8,95.5,98.7,102.3,100.6,97.2,94.8,92.1,91.0,91.7,90.2,93.5,95.0,93.9,94.7,96.0,93.9,138],crisis:true},
+  {id:21,n:"Manufacturing Labour",u:"Index",gw:0.07,base:99.27,cur:103.4,src:"BLS ECI Manufacturing",cat:5,
+   drift:0.035,vol:0.03,mr:0.05, monthly:[93.5,93.7,93.9,94.2,94.4,94.6,94.8,95.0,95.3,95.5,95.7,95.9,96.2,96.4,96.6,96.8,97.1,97.3,97.5,97.8,98.0,98.2,98.5,98.7,99.0,99.3,99.5,99.8,100.0,100.3,100.5,100.8,101.0,101.3,101.5,101.8,102.0,102.3,103.4],crisis:false}
+];
+
+const CATS=["Resins & Binders","Pigments & Extenders","Solvents","Additives & Biocides","Packaging & Logistics","Energy & Labour"];
+const CAT_COL=["#4472C4","#ED7D31","#A5A5A5","#FFC000","#5B9BD5","#70AD47"];
+const CAT_WEIGHTS=[.24,.18,.25,.08,.10,.15];
+
+// REGIONS — weight vectors updated for 25% solvent weighting
+// All vectors sum to exactly 1.00
+const REGIONS=[
+  {id:"global",name:"Global",short:"GLB",color:"#3A913F",flag:"\ud83c\udf0d",
+   w:[.08,.04,.04,.04,.04, .05,.04,.03,.03,.02,.01, .10,.08,.07, .03,.02,.03, .04,.06, .08,.07],vm:1.0,
+   pm:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]},
+  {id:"asia",name:"Asia-Pacific",short:"APAC",color:"#DC2626",flag:"\ud83c\udf0f",
+   w:[.07,.04,.04,.05,.05, .04,.04,.05,.03,.02,.01, .10,.07,.07, .02,.02,.03, .04,.08, .07,.06],vm:1.05,
+   pm:[.95,.97,1.02,.93,.88,.85,1.02,1.05,.90,.95,.85,1,.98,.98,1.05,1,.95,.95,1.15,.88,.65]},
+  {id:"europe",name:"Europe",short:"EUR",color:"#4472C4",flag:"\ud83c\uddea\ud83c\uddfa",
+   w:[.07,.04,.04,.04,.04, .04,.04,.03,.02,.02,.01, .09,.07,.06, .03,.02,.04, .04,.04, .10,.12],vm:.90,
+   pm:[1.08,1.05,.98,1.05,1.1,1.05,.98,.95,1.05,1.03,1.1,1.08,1.05,1.05,.98,1.02,1.12,1.05,.85,1.25,1.35]},
+  {id:"americas",name:"Americas",short:"AMR",color:"#16A34A",flag:"\ud83c\udf0e",
+   w:[.08,.05,.04,.04,.04, .05,.04,.03,.03,.02,.01, .10,.07,.07, .03,.02,.03, .05,.05, .07,.08],vm:.95,
+   pm:[1,1.02,1,1,1.05,1,.95,1,1,1,.95,.95,.97,.97,1,1,1,1.08,.92,.82,1.1]},
+  {id:"mideast",name:"Middle East",short:"ME",color:"#F59E0B",flag:"\ud83c\udde6\ud83c\uddea",
+   w:[.08,.04,.04,.04,.04, .04,.04,.05,.02,.02,.01, .09,.07,.07, .02,.02,.03, .04,.10, .06,.08],vm:1.10,
+   pm:[1.12,1.1,1.08,1.1,1.15,1.08,1.05,1.08,1.1,1.08,1.12,1.05,1.05,1.05,1.08,1.05,1.05,1.1,1.3,.7,.6]},
+  {id:"africa",name:"Africa",short:"AFR",color:"#8B5CF6",flag:"\ud83c\udf0d",
+   w:[.07,.04,.04,.04,.04, .04,.04,.04,.03,.02,.01, .09,.06,.07, .02,.02,.03, .04,.12, .07,.07],vm:1.15,
+   pm:[1.15,1.12,1.1,1.12,1.18,1.12,1.08,1.1,1.08,1.1,1.05,1.1,1.08,1.08,1.12,1.08,1.08,1.15,1.4,1.05,.8]}
+];
+
+// ============================================================
+// BUILD HISTORICAL DATA FROM MONTHLY SERIES (interpolated to daily)
+// ============================================================
+// monthly[] has 39 entries: Jan2023..Mar2026
+const monthStarts=[];
+for(let y=2023;y<=2026;y++) for(let m=0;m<12;m++){
+  if(y===2026&&m>2) break;
+  monthStarts.push(new Date(y,m,1));
+}
+
+// Generate trading days
+const allTradingDays=[];
+let dd=new Date(2023,0,2);
+const endD=new Date(2026,2,7);
+while(dd<=endD){if(dd.getDay()!==0&&dd.getDay()!==6) allTradingDays.push(new Date(dd)); dd.setDate(dd.getDate()+1);}
+
+// Interpolate monthly to daily with micro noise
+let seed=42;
+function rng(){seed=(seed*16807)%2147483647;return(seed-1)/2147483646;}
+function rnorm(){const u=rng(),v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+const HIST=allTradingDays.map(day=>{
+  const y=day.getFullYear(),m=day.getMonth();
+  let mIdx=(y-2023)*12+m;
+  if(mIdx<0) mIdx=0; if(mIdx>38) mIdx=38;
+  const dayInMonth=day.getDate(), daysInMonth=new Date(y,m+1,0).getDate();
+  const frac=dayInMonth/daysInMonth;
+  const prices=C.map((c,i)=>{
+    if(mIdx>=38){
+      // March 2026 (idx 38): flat at crisis level with noise
+      const p=c.monthly[38];
+      const noise=p*c.vol/Math.sqrt(252)*rnorm()*0.3;
+      return Math.round((p+noise)*100)/100;
+    }
+    // Feb 2026 (mIdx=37): crisis spike on Feb 28 — keep stable until day 26, then spike
+    if(mIdx===37 && c.crisis){
+      const p0=c.monthly[37], p1=c.monthly[38];
+      if(dayInMonth<26){
+        // Pre-crisis: stable at Feb level with normal noise
+        const noise=p0*c.vol/Math.sqrt(252)*rnorm()*0.3;
+        return Math.round((p0+noise)*100)/100;
+      } else {
+        // Crisis onset Feb 26-28: sharp ramp over 3 days
+        const crisisFrac=Math.min((dayInMonth-25)/3, 1);
+        const interp=p0+(p1-p0)*crisisFrac;
+        const noise=interp*c.vol/Math.sqrt(252)*rnorm()*0.5;
+        return Math.round((interp+noise)*100)/100;
+      }
+    }
+    // Nov 2023 (mIdx=10) Red Sea crisis — freight spikes
+    if(mIdx===10 && i===18 && c.crisis){
+      const p0=c.monthly[10], p1=c.monthly[11];
+      if(dayInMonth<20){
+        const noise=p0*c.vol/Math.sqrt(252)*rnorm()*0.3;
+        return Math.round((p0+noise)*100)/100;
+      } else {
+        const crisisFrac=Math.min((dayInMonth-19)/10, 1);
+        const interp=p0+(p1-p0)*crisisFrac;
+        const noise=interp*c.vol/Math.sqrt(252)*rnorm()*0.4;
+        return Math.round((interp+noise)*100)/100;
+      }
+    }
+    const p0=c.monthly[mIdx], p1=c.monthly[Math.min(mIdx+1,38)];
+    const interp=p0+(p1-p0)*frac;
+    const noise=interp*c.vol/Math.sqrt(252)*rnorm()*0.3;
+    return Math.round((interp+noise)*100)/100;
+  });
+  return {date:day,prices};
+});
+
+const allDates=HIST.map(h=>h.date);
+const allLabels=allDates.map(d=>{
+  const m=d.toLocaleDateString('en-US',{month:'short'});
+  const day=d.getDate();
+  // Show year on Jan 1st or first trading day of year
+  if(d.getMonth()===0&&day<=3) return m+' '+d.getFullYear();
+  return m+' '+day;
+});
+
+// ============================================================
+// INDEX CALCULATIONS
+// ============================================================
+function calcRegional(ri,p){
+  const R=REGIONS[ri];
+  return 100*R.w.reduce((s,w,i)=>{
+    const gr=p[i]/C[i].base;
+    const regRatio=1+(gr-1)*R.vm*R.pm[i];
+    return s+w*regRatio;
+  },0);
+}
+function calcCatIdx(ri,ci,p){
+  const R=REGIONS[ri];let ws=0,vs=0;
+  C.forEach((c,i)=>{if(c.cat===ci){ws+=R.w[i];const gr=p[i]/c.base;vs+=R.w[i]*(1+(gr-1)*R.vm*R.pm[i]);}});
+  return ws?100*vs/ws:100;
+}
+
+const regSeries=REGIONS.map((R,ri)=>HIST.map(h=>calcRegional(ri,h.prices)));
+const catSeries=REGIONS.map((R,ri)=>CATS.map((cn,ci)=>HIST.map(h=>calcCatIdx(ri,ci,h.prices))));
+
+// ============================================================
+// MONTE CARLO FORECAST
+// ============================================================
+const FORECAST_DAYS=[22,66,132]; // 30d,90d,180d in trading days
+const N_SIMS=1000;
+
+function forecastCommodity(ci,days){
+  const c=C[ci], p0=c.cur, dt=1/252;
+  const mu=c.drift, sigma=c.vol, kappa=c.mr;
+  const paths=[];
+  for(let s=0;s<N_SIMS;s++){
+    let p=p0;
+    const path=[p];
+    for(let t=1;t<=days;t++){
+      const mrDrift=-kappa*(p/c.base-1)*dt*252;
+      p*=Math.exp((mu+mrDrift)*dt+sigma*Math.sqrt(dt)*rnorm());
+      path.push(p);
+    }
+    paths.push(path);
+  }
+  return paths;
+}
+
+// Pre-compute forecasts
+const FC={};
+[22,66,132].forEach(days=>{
+  const allPaths=C.map((c,i)=>forecastCommodity(i,days));
+  REGIONS.forEach((R,ri)=>{
+    const endpoints=[];
+    for(let s=0;s<N_SIMS;s++){
+      const prices=C.map((c,i)=>allPaths[i][s][days]);
+      endpoints.push(calcRegional(ri,prices));
+    }
+    endpoints.sort((a,b)=>a-b);
+    const key=`${ri}_${days}`;
+    FC[key]={
+      p10:endpoints[Math.floor(N_SIMS*.1)],
+      p50:endpoints[Math.floor(N_SIMS*.5)],
+      p90:endpoints[Math.floor(N_SIMS*.9)],
+      mean:endpoints.reduce((s,v)=>s+v,0)/N_SIMS
+    };
+  });
+  C.forEach((c,i)=>{
+    const eps=allPaths[i].map(p=>p[days]).sort((a,b)=>a-b);
+    FC[`c${i}_${days}`]={
+      p10:eps[Math.floor(N_SIMS*.1)],
+      p50:eps[Math.floor(N_SIMS*.5)],
+      p90:eps[Math.floor(N_SIMS*.9)]
+    };
+  });
+});
+
+function buildForecastPath(ri,maxDays){
+  const allPaths=C.map((c,i)=>forecastCommodity(i,maxDays));
+  const dailyMedian=[],dailyP10=[],dailyP90=[];
+  for(let t=0;t<=maxDays;t++){
+    const vals=[];
+    for(let s=0;s<N_SIMS;s++){
+      const prices=C.map((c,i)=>allPaths[i][s][t]);
+      vals.push(calcRegional(ri,prices));
+    }
+    vals.sort((a,b)=>a-b);
+    dailyMedian.push(vals[Math.floor(N_SIMS*.5)]);
+    dailyP10.push(vals[Math.floor(N_SIMS*.1)]);
+    dailyP90.push(vals[Math.floor(N_SIMS*.9)]);
+  }
+  return {median:dailyMedian,p10:dailyP10,p90:dailyP90};
+}
+
+const fcPaths=REGIONS.map((R,ri)=>buildForecastPath(ri,132));
+
+const fcDates=[];
+let fd=new Date(2026,2,7);
+for(let i=0;i<=132;i++){
+  fd.setDate(fd.getDate()+1);
+  while(fd.getDay()===0||fd.getDay()===6) fd.setDate(fd.getDate()+1);
+  fcDates.push(new Date(fd));
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function fmt(v,d=2){return v.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});}
+function pct(v){return(v>=0?'+':'')+((v*100).toFixed(1))+'%';}
+function cls(v){return v>.0001?'up':v<-.0001?'down':'flat';}
+document.getElementById('todayDate').textContent=new Date(2026,2,7).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+// Tab nav
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('pan-'+t.dataset.tab).classList.add('active');
+  });
+});
+
+// ============================================================
+// Y-AXIS SCALE MANAGEMENT
+// ============================================================
+function getDataMinMax(datasets){
+  let mn=Infinity,mx=-Infinity;
+  datasets.forEach(ds=>{
+    if(!ds.data) return;
+    ds.data.forEach(v=>{if(v!==null&&v!==undefined&&isFinite(v)){mn=Math.min(mn,v);mx=Math.max(mx,v);}});
+  });
+  return {mn,mx};
+}
+
+// Round to nice tick values (e.g. 94.3 -> 94, 117.8 -> 118, 1432 -> 1430)
+function niceFloor(v){
+  if(v>=1000){const s=Math.pow(10,Math.floor(Math.log10(v))-1);return Math.floor(v/s)*s;}
+  if(v>=100) return Math.floor(v);
+  return Math.floor(v*2)/2;
+}
+function niceCeil(v){
+  if(v>=1000){const s=Math.pow(10,Math.floor(Math.log10(v))-1);return Math.ceil(v/s)*s;}
+  if(v>=100) return Math.ceil(v);
+  return Math.ceil(v*2)/2;
+}
+
+// Smart auto-fit: pads 5% above/below visible data, snaps to nice numbers
+function smartAutoFit(chart,yMinInput,yMaxInput){
+  const {mn,mx}=getDataMinMax(chart.data.datasets);
+  if(!isFinite(mn)||!isFinite(mx)) return;
+  const pad=(mx-mn)*0.05;
+  const newMin=niceFloor(mn-pad);
+  const newMax=niceCeil(mx+pad);
+  chart.options.scales.y.min=Math.max(0,newMin);
+  chart.options.scales.y.max=newMax;
+  if(yMinInput){yMinInput.value=chart.options.scales.y.min;}
+  if(yMaxInput){yMaxInput.value=chart.options.scales.y.max;}
+  chart.update();
+}
+
+function applyScale(chart,yMinInput,yMaxInput){
+  const yMinVal=yMinInput.value?parseFloat(yMinInput.value):undefined;
+  const yMaxVal=yMaxInput.value?parseFloat(yMaxInput.value):undefined;
+  chart.options.scales.y.min=yMinVal;
+  chart.options.scales.y.max=yMaxVal;
+  chart.update();
+}
+
+function zoomY(chart,direction,yMinInput,yMaxInput){
+  const {mn,mx}=getDataMinMax(chart.data.datasets);
+  const curMin=chart.options.scales.y.min!==undefined?chart.options.scales.y.min:mn;
+  const curMax=chart.options.scales.y.max!==undefined?chart.options.scales.y.max:mx;
+  const range=curMax-curMin;
+  const mid=(curMax+curMin)/2;
+  const factor=direction==='in'?0.7:1.4;
+  const newRange=range*factor;
+  const newMin=niceFloor(Math.max(0,mid-newRange/2));
+  const newMax=niceCeil(mid+newRange/2);
+  chart.options.scales.y.min=newMin;
+  chart.options.scales.y.max=newMax;
+  yMinInput.value=chart.options.scales.y.min;
+  yMaxInput.value=chart.options.scales.y.max;
+  chart.update();
+}
+
+function autoScale(chart,yMinInput,yMaxInput){
+  smartAutoFit(chart,yMinInput,yMaxInput);
+}
+
+// ============================================================
+// OVERVIEW
+// ============================================================
+function renderRegionCards(id){
+  document.getElementById(id).innerHTML=REGIONS.map((R,ri)=>{
+    const v=regSeries[ri],latest=v[v.length-1],prev=v[v.length-2];
+    const chg=(latest-prev)/prev,bchg=(latest-100)/100;
+    const fc90=FC[`${ri}_66`];
+    return `<div class="region-card" style="border-top-color:${R.color}">
+      <h4>${R.flag} ${R.name}</h4>
+      <div class="rv">${fmt(latest)}</div>
+      <div class="rc ${cls(chg)}">${pct(chg)} today</div>
+      <div style="font-size:10px;color:var(--text-light)">${pct(bchg)} vs base</div>
+      <div style="font-size:10px;color:var(--text-light);margin-top:4px;">90d forecast: <strong>${fmt(fc90.p50)}</strong></div>
+    </div>`;
+  }).join('');
+}
+renderRegionCards('regionCards');
+
+let range1=9999;
+let chartAllReg,chartCat;
+let xDateStart1=null, xDateEnd1=null; // custom date range for overview
+
+function getOverviewSlice(){
+  let startIdx=0, endIdx=allDates.length-1;
+  if(xDateStart1||xDateEnd1){
+    // Custom date mode
+    if(xDateStart1){
+      const t=xDateStart1.getTime();
+      startIdx=allDates.findIndex(d=>d.getTime()>=t);
+      if(startIdx<0) startIdx=0;
+    }
+    if(xDateEnd1){
+      const t=xDateEnd1.getTime();
+      for(let i=allDates.length-1;i>=0;i--){if(allDates[i].getTime()<=t){endIdx=i;break;}}
+    }
+  } else {
+    // Range-button mode
+    const n=Math.min(range1,HIST.length);
+    startIdx=HIST.length-n;
+  }
+  return {off:startIdx, end:endIdx+1};
+}
+
+function buildAllRegionsChart(){
+  const {off,end}=getOverviewSlice();
+  const labels=allLabels.slice(off,end);
+  const ds=REGIONS.map((R,ri)=>({
+    label:R.name,data:regSeries[ri].slice(off,end),borderColor:R.color,
+    backgroundColor:'transparent',borderWidth:ri===0?3:1.8,tension:.3,pointRadius:0,pointHitRadius:6
+  }));
+  if(chartAllReg) chartAllReg.destroy();
+  chartAllReg=new Chart(document.getElementById('allRegionsChart'),{
+    type:'line',data:{labels,datasets:ds},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12,padding:14}},
+        tooltip:{backgroundColor:'rgba(27,42,74,.92)',titleFont:{size:12},bodyFont:{size:11},
+          callbacks:{title:items=>{const idx=items[0].dataIndex+off;return allDates[idx].toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'});},
+            label:item=>` ${item.dataset.label}: ${item.raw.toFixed(2)}`}}},
+      scales:{x:{grid:{display:false},ticks:{maxTicksLimit:16,font:{size:10}}},
+        y:{grid:{color:'#E2E8F0'},ticks:{font:{size:11},callback:v=>v.toFixed(1)},
+          title:{display:true,text:'PMCI Index Value',font:{size:12,weight:'bold'}}}}}
+  });
+}
+
+// Category chart — shows how each category performs
+function buildCatChart(){
+  const {off,end}=getOverviewSlice();
+  const labels=allLabels.slice(off,end);
+  const ds=CATS.map((cat,ci)=>({
+    label:`${cat} (${(CAT_WEIGHTS[ci]*100).toFixed(0)}%)`,
+    data:catSeries[0][ci].slice(off,end),
+    borderColor:CAT_COL[ci],backgroundColor:'transparent',
+    borderWidth:1.8,
+    tension:.3,pointRadius:0,
+    borderDash:ci===2?[]:[],
+  }));
+  if(chartCat) chartCat.destroy();
+  chartCat=new Chart(document.getElementById('catChart'),{
+    type:'line',data:{labels,datasets:ds},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:12}},
+        tooltip:{callbacks:{label:item=>{if(item.raw===null) return '';return ` ${item.dataset.label}: ${item.raw.toFixed(2)}`;}}}},
+      scales:{x:{grid:{display:false},ticks:{maxTicksLimit:14,font:{size:10}}},
+        y:{grid:{color:'#E2E8F0'},ticks:{font:{size:10}},title:{display:true,text:'Category Sub-Index (base=100)',font:{size:11,weight:'bold'}}}}}
+  });
+}
+
+// Wire up range toggles
+document.querySelectorAll('#rangeToggle1 .btn-g').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#rangeToggle1 .btn-g').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');range1=parseInt(btn.dataset.r);
+    xDateStart1=null;xDateEnd1=null; // clear custom dates
+    document.getElementById('xStart1').value='2023-01-02';
+    document.getElementById('xEnd1').value='2026-03-07';
+    buildAllRegionsChart();buildCatChart();
+    smartAutoFit(chartAllReg,document.getElementById('yMin1'),document.getElementById('yMax1'));
+  });
+});
+
+buildAllRegionsChart();buildCatChart();
+smartAutoFit(chartAllReg,document.getElementById('yMin1'),document.getElementById('yMax1'));
+
+// Wire up X-axis date controls for overview
+document.getElementById('xApply1').addEventListener('click',()=>{
+  const sv=document.getElementById('xStart1').value;
+  const ev=document.getElementById('xEnd1').value;
+  if(sv) xDateStart1=new Date(sv+'T00:00:00');
+  if(ev) xDateEnd1=new Date(ev+'T23:59:59');
+  // Deselect range buttons since we're in custom mode
+  document.querySelectorAll('#rangeToggle1 .btn-g').forEach(b=>b.classList.remove('active'));
+  buildAllRegionsChart();buildCatChart();
+  smartAutoFit(chartAllReg,document.getElementById('yMin1'),document.getElementById('yMax1'));
+});
+document.getElementById('xReset1').addEventListener('click',()=>{
+  xDateStart1=null;xDateEnd1=null;
+  document.getElementById('xStart1').value='2023-01-02';
+  document.getElementById('xEnd1').value='2026-03-07';
+  range1=9999;
+  document.querySelectorAll('#rangeToggle1 .btn-g').forEach(b=>b.classList.remove('active'));
+  document.querySelector('#rangeToggle1 .btn-g[data-r="9999"]').classList.add('active');
+  buildAllRegionsChart();buildCatChart();
+  smartAutoFit(chartAllReg,document.getElementById('yMin1'),document.getElementById('yMax1'));
+});
+
+// Wire up scale controls for overview
+document.getElementById('scaleZoomIn1').addEventListener('click',()=>zoomY(chartAllReg,'in',document.getElementById('yMin1'),document.getElementById('yMax1')));
+document.getElementById('scaleZoomOut1').addEventListener('click',()=>zoomY(chartAllReg,'out',document.getElementById('yMin1'),document.getElementById('yMax1')));
+document.getElementById('scaleAuto1').addEventListener('click',()=>autoScale(chartAllReg,document.getElementById('yMin1'),document.getElementById('yMax1')));
+document.getElementById('scaleApply1').addEventListener('click',()=>applyScale(chartAllReg,document.getElementById('yMin1'),document.getElementById('yMax1')));
+
+// ============================================================
+// FORECAST CHART
+// ============================================================
+let chartFC;
+let fcHistStart=null; // custom start date for forecast history window
+function buildForecastChart(){
+  let histOff;
+  if(fcHistStart){
+    const t=fcHistStart.getTime();
+    histOff=allDates.findIndex(d=>d.getTime()>=t);
+    if(histOff<0) histOff=0;
+  } else {
+    const histN=132;
+    histOff=HIST.length-histN;
+  }
+  const histLabels=allLabels.slice(histOff);
+  const fcLabels=fcDates.map(d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const allLbls=[...histLabels,'|',...fcLabels];
+
+  const datasets=[];
+  REGIONS.forEach((R,ri)=>{
+    const histData=regSeries[ri].slice(histOff);
+    const fcData=fcPaths[ri].median;
+    const fullP10=[...Array(histData.length).fill(null),null,...fcPaths[ri].p10];
+    const fullP90=[...Array(histData.length).fill(null),null,...fcPaths[ri].p90];
+
+    datasets.push({
+      label:R.name,data:[...histData,...Array(fcData.length+1).fill(null)],
+      borderColor:R.color,backgroundColor:'transparent',borderWidth:ri===0?3:1.8,
+      tension:.3,pointRadius:0,borderDash:[]
+    });
+    datasets.push({
+      label:R.name+' (forecast)',data:[...Array(histData.length-1).fill(null),histData[histData.length-1],...fcData],
+      borderColor:R.color,backgroundColor:'transparent',borderWidth:ri===0?2.5:1.5,
+      tension:.3,pointRadius:0,borderDash:[6,4]
+    });
+    if(ri===0){
+      datasets.push({
+        label:'80% CI (upper)',data:fullP90,borderColor:'rgba(27,42,74,.15)',backgroundColor:'rgba(27,42,74,.06)',
+        fill:'+1',borderWidth:0,tension:.3,pointRadius:0
+      });
+      datasets.push({
+        label:'80% CI (lower)',data:fullP10,borderColor:'rgba(27,42,74,.15)',backgroundColor:'transparent',
+        borderWidth:0,tension:.3,pointRadius:0
+      });
+    }
+  });
+
+  if(chartFC) chartFC.destroy();
+  chartFC=new Chart(document.getElementById('forecastChart'),{
+    type:'line',data:{labels:allLbls,datasets},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:10,
+        filter:item=>!item.text.includes('CI')&&!item.text.includes('forecast')}},
+        tooltip:{filter:item=>!item.dataset.label.includes('CI'),
+          callbacks:{label:item=>{if(item.raw===null) return '';return ` ${item.dataset.label}: ${item.raw.toFixed(2)}`;}}}},
+      scales:{x:{grid:{display:false},ticks:{maxTicksLimit:18,font:{size:9}}},
+        y:{grid:{color:'#E2E8F0'},ticks:{font:{size:11}},title:{display:true,text:'PMCI Index Value',font:{size:12,weight:'bold'}}}}}
+  });
+}
+buildForecastChart();
+smartAutoFit(chartFC,document.getElementById('yMinFC'),document.getElementById('yMaxFC'));
+
+// Wire up forecast scale controls
+document.getElementById('scaleZoomInFC').addEventListener('click',()=>zoomY(chartFC,'in',document.getElementById('yMinFC'),document.getElementById('yMaxFC')));
+document.getElementById('scaleZoomOutFC').addEventListener('click',()=>zoomY(chartFC,'out',document.getElementById('yMinFC'),document.getElementById('yMaxFC')));
+document.getElementById('scaleAutoFC').addEventListener('click',()=>autoScale(chartFC,document.getElementById('yMinFC'),document.getElementById('yMaxFC')));
+document.getElementById('scaleApplyFC').addEventListener('click',()=>applyScale(chartFC,document.getElementById('yMinFC'),document.getElementById('yMaxFC')));
+
+// Set default dates for forecast X-axis
+(function(){
+  const defStart=allDates[Math.max(0,HIST.length-132)];
+  const lastFc=fcDates[fcDates.length-1];
+  document.getElementById('xStartFC').value=defStart.toISOString().split('T')[0];
+  document.getElementById('xEndFC').value=lastFc.toISOString().split('T')[0];
+  document.getElementById('xEndFC').setAttribute('disabled','true'); // forecast end is fixed
+})();
+
+document.getElementById('xApplyFC').addEventListener('click',()=>{
+  const sv=document.getElementById('xStartFC').value;
+  if(sv) fcHistStart=new Date(sv+'T00:00:00');
+  buildForecastChart();
+  smartAutoFit(chartFC,document.getElementById('yMinFC'),document.getElementById('yMaxFC'));
+});
+document.getElementById('xResetFC').addEventListener('click',()=>{
+  fcHistStart=null;
+  const defStart=allDates[Math.max(0,HIST.length-132)];
+  document.getElementById('xStartFC').value=defStart.toISOString().split('T')[0];
+  buildForecastChart();
+  smartAutoFit(chartFC,document.getElementById('yMinFC'),document.getElementById('yMaxFC'));
+});
+
+// ============================================================
+// FORECAST TABLE
+// ============================================================
+function buildForecastTable(){
+  let html='<thead><tr><th>Region</th><th>Current</th>';
+  ['30-Day','90-Day','180-Day'].forEach(h=>{html+=`<th>${h} Median</th><th>80% CI</th><th>Chg</th>`;});
+  html+='</tr></thead><tbody>';
+  REGIONS.forEach((R,ri)=>{
+    const cur=regSeries[ri][regSeries[ri].length-1];
+    html+=`<tr><td style="color:${R.color}">${R.flag} ${R.name}</td><td><strong>${fmt(cur)}</strong></td>`;
+    [22,66,132].forEach(d=>{
+      const fc=FC[`${ri}_${d}`];
+      const chg=(fc.p50-cur)/cur;
+      html+=`<td><strong>${fmt(fc.p50)}</strong></td><td style="font-size:10px">${fmt(fc.p10)} \u2013 ${fmt(fc.p90)}</td>
+        <td class="${cls(chg)}">${pct(chg)}</td>`;
+    });
+    html+='</tr>';
+  });
+  html+='</tbody>';
+  document.getElementById('forecastTable').innerHTML=html;
+}
+buildForecastTable();
+
+// ============================================================
+// COMMODITY FORECAST TABLE
+// ============================================================
+function buildCommodityForecastTable(){
+  let html='<thead><tr><th>Commodity</th><th>Base</th><th>Current</th><th>vs Base</th><th>30D Forecast</th><th>90D Forecast</th><th>180D Forecast</th><th>Source</th></tr></thead><tbody>';
+  let curCat=-1;
+  C.forEach((c,i)=>{
+    if(c.cat!==curCat){curCat=c.cat;html+=`<tr style="background:#F1F5F9"><td colspan="8" style="font-weight:700;color:var(--dark-blue);text-transform:uppercase;font-size:11px">${CATS[c.cat]} (${(CAT_WEIGHTS[c.cat]*100).toFixed(0)}%)</td></tr>`;}
+    const bchg=(c.cur-c.base)/c.base;
+    const fc30=FC[`c${i}_22`],fc90=FC[`c${i}_66`],fc180=FC[`c${i}_132`];
+    const chg180=(fc180.p50-c.cur)/c.cur;
+    const rowCls='';
+    html+=`<tr${rowCls}><td>${c.n}</td><td>${fmt(c.base,0)}</td><td><strong>${fmt(c.cur,0)}</strong></td>
+      <td class="${cls(bchg)}">${pct(bchg)}</td>
+      <td>${fmt(fc30.p50,0)} <span style="font-size:9px;color:var(--text-light)">(${fmt(fc30.p10,0)}\u2013${fmt(fc30.p90,0)})</span></td>
+      <td>${fmt(fc90.p50,0)} <span style="font-size:9px;color:var(--text-light)">(${fmt(fc90.p10,0)}\u2013${fmt(fc90.p90,0)})</span></td>
+      <td class="${cls(chg180)}">${fmt(fc180.p50,0)} <span style="font-size:9px">(${pct(chg180)})</span></td>
+      <td class="source-tag">${c.src}</td></tr>`;
+  });
+  html+='</tbody>';
+  document.getElementById('commodityForecastTable').innerHTML=html;
+}
+buildCommodityForecastTable();
+
+// ============================================================
+// COMMODITY DETAIL TABLE
+// ============================================================
+function buildCommodityTable(){
+  let html='<thead><tr><th>#</th><th>Commodity</th><th>Unit</th><th>Weight</th><th>Base (Q1 2025)</th><th>Current</th><th>vs Base</th><th>Source</th></tr></thead><tbody>';
+  let curCat=-1;
+  C.forEach((c,i)=>{
+    if(c.cat!==curCat){
+      curCat=c.cat;
+      const catW=CAT_WEIGHTS[c.cat];
+      html+=`<tr style="background:#F1F5F9"><td colspan="8" style="font-weight:700;color:var(--dark-blue);text-transform:uppercase;font-size:11px">${CATS[c.cat]} — ${(catW*100).toFixed(0)}% of index</td></tr>`;
+    }
+    const bchg=(c.cur-c.base)/c.base;
+    const rowCls='';
+    html+=`<tr${rowCls}><td style="text-align:center;color:var(--text-light)">${c.id}</td><td><strong>${c.n}</strong></td>
+      <td style="font-size:10px;color:var(--text-light)">${c.u}</td>
+      <td>${(c.gw*100).toFixed(1)}%<span class="wb" style="width:${c.gw*300}px;background:var(--med-blue)"></span></td>
+      <td style="text-align:right">${fmt(c.base,0)}</td>
+      <td style="text-align:right;font-weight:600">${fmt(c.cur,0)}</td>
+      <td class="${cls(bchg)}" style="text-align:right">${pct(bchg)}</td>
+      <td class="source-tag">${c.src}</td></tr>`;
+  });
+  html+='</tbody>';
+  document.getElementById('commodityTable').innerHTML=html;
+}
+buildCommodityTable();
+
+// ============================================================
+// ============================================================
+// WEIGHT TABLE — GLOBAL ONLY
+// ============================================================
+function buildWeightTable(){
+  const G=REGIONS[0];
+  let html='<thead><tr><th style="text-align:left">Raw Material</th><th>Unit</th><th>Base Price<br><span style="font-weight:400;font-size:9px">(Q1 2025)</span></th><th>Current Price</th><th>Weight</th><th style="width:180px"></th></tr></thead><tbody>';
+  let curCat=-1;
+  C.forEach((c,i)=>{
+    if(c.cat!==curCat){
+      curCat=c.cat;
+      const catW=CAT_WEIGHTS[c.cat];
+      html+=`<tr style="background:#F1F5F9"><td colspan="6" style="font-weight:700;color:var(--dark-blue);text-transform:uppercase;font-size:11px;letter-spacing:.3px">${CATS[c.cat]} — ${(catW*100).toFixed(0)}%</td></tr>`;
+    }
+    const w=G.w[i];
+    const bchg=(c.cur-c.base)/c.base;
+    const rowCls='';
+    const barColor=CAT_COL[c.cat];
+    const chgCls=bchg>.0001?'up':bchg<-.0001?'down':'flat';
+    html+=`<tr${rowCls}>
+      <td>${c.n}</td>
+      <td style="font-size:10px;color:var(--text-light)">${c.u}</td>
+      <td style="text-align:right">${fmt(c.base,0)}</td>
+      <td style="text-align:right;font-weight:600">${fmt(c.cur,0)} <span class="${chgCls}" style="font-size:10px">(${(bchg>=0?'+':'')}${(bchg*100).toFixed(1)}%)</span></td>
+      <td style="text-align:center;font-weight:700;font-size:13px">${(w*100).toFixed(0)}%</td>
+      <td><span class="wb" style="width:${w*450}px;background:${barColor};height:8px;border-radius:4px"></span></td></tr>`;
+  });
+  const total=G.w.reduce((s,w)=>s+w,0);
+  html+=`<tr style="background:var(--navy);color:white;font-weight:700">
+    <td colspan="4" style="color:white;text-align:right">TOTAL</td>
+    <td style="color:white;text-align:center;font-size:14px">${(total*100).toFixed(0)}%</td><td></td></tr>`;
+  html+='</tbody>';
+  document.getElementById('weightTable').innerHTML=html;
+}
+buildWeightTable();
+
+// ============================================================
+// MONTHLY SUMMARY
+// ============================================================
+let monthRegion=0;
+function buildMonthlyTable(){
+  const ri=monthRegion,months={};
+  HIST.forEach((h,t)=>{
+    const key=h.date.getFullYear()+'-'+String(h.date.getMonth()+1).padStart(2,'0');
+    if(!months[key]) months[key]={label:h.date.toLocaleDateString('en-US',{year:'numeric',month:'short'}),first:t,last:t};
+    months[key].last=t;
+  });
+  let html='<thead><tr><th>Month</th><th>Open</th><th>Close</th><th>Change</th><th>High</th><th>Low</th>';
+  REGIONS.filter((_,i)=>i!==ri).forEach(R=>{html+=`<th style="font-size:9px">${R.short}</th>`;});
+  html+='</tr></thead><tbody>';
+  Object.values(months).forEach(m=>{
+    const s=regSeries[ri];
+    const open=s[m.first],close=s[m.last],chg=(close-open)/open;
+    const slice=s.slice(m.first,m.last+1);
+    html+=`<tr><td>${m.label}</td><td>${fmt(open)}</td><td>${fmt(close)}</td>
+      <td class="${cls(chg)}">${pct(chg)}</td><td>${fmt(Math.max(...slice))}</td><td>${fmt(Math.min(...slice))}</td>`;
+    REGIONS.filter((_,i)=>i!==ri).forEach(R=>{
+      const idx=REGIONS.indexOf(R);
+      html+=`<td style="font-size:10px">${fmt(regSeries[idx][m.last])}</td>`;
+    });
+    html+='</tr>';
+  });
+  html+='</tbody>';
+  document.getElementById('monthlyTable').innerHTML=html;
+}
+function buildMonthRegionToggle(){
+  document.getElementById('monthRegionToggle').innerHTML=REGIONS.map((R,ri)=>
+    `<button class="btn-g ${ri===0?'active':''}" onclick="setMR(${ri})">${R.short}</button>`).join('');
+}
+function setMR(ri){monthRegion=ri;document.querySelectorAll('#monthRegionToggle .btn-g').forEach((b,i)=>b.classList.toggle('active',i===ri));buildMonthlyTable();}
+buildMonthRegionToggle();buildMonthlyTable();
+
+</script>
+
+<!-- PWA Install Banner -->
+<div class="pwa-install-banner" id="pwaBanner">
+  <span>Install PMCI on your device for quick access</span>
+  <button id="pwaInstallBtn">Install App</button>
+  <button class="dismiss" id="pwaDismiss">Not now</button>
+</div>
+
+<script>
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW registration failed:', err));
+  });
+}
+
+// PWA Install Prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('pwaBanner').style.display = 'block';
+});
+
+document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const result = await deferredPrompt.userChoice;
+  console.log('Install result:', result.outcome);
+  deferredPrompt = null;
+  document.getElementById('pwaBanner').style.display = 'none';
+});
+
+document.getElementById('pwaDismiss').addEventListener('click', () => {
+  document.getElementById('pwaBanner').style.display = 'none';
+});
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('pwaBanner').style.display = 'none';
+  console.log('PMCI app installed');
+});
+
+// iOS install hint (iOS doesn't support beforeinstallprompt)
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isStandalone = window.navigator.standalone === true;
+if (isIOS && !isStandalone) {
+  const banner = document.getElementById('pwaBanner');
+  banner.querySelector('span').textContent = 'Tap the Share button ↑ then "Add to Home Screen" to install';
+  banner.querySelector('#pwaInstallBtn').style.display = 'none';
+  banner.style.display = 'block';
+}
+</script>
+</body>
+</html>
