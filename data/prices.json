@@ -1,0 +1,137 @@
+{
+  "updated": "2026-03-07",
+  "fetched_at": "2026-03-07T21:08:49.043514Z",
+  "live_count": 0,
+  "total_count": 21,
+  "wti_price": null,
+  "lme_zinc": null,
+  "lme_copper": null,
+  "commodities": {
+    "1": {
+      "price": 4250,
+      "name": "Epoxy Resin (DGEBA)",
+      "source": "hardcoded",
+      "live": false
+    },
+    "2": {
+      "price": 3350,
+      "name": "Polyurethane Polyol",
+      "source": "hardcoded",
+      "live": false
+    },
+    "3": {
+      "price": 2700,
+      "name": "Alkyd Resin (long oil)",
+      "source": "hardcoded",
+      "live": false
+    },
+    "4": {
+      "price": 3600,
+      "name": "Acrylic Copolymer (SPC)",
+      "source": "hardcoded",
+      "live": false
+    },
+    "5": {
+      "price": 2050,
+      "name": "Rosin (WW grade)",
+      "source": "hardcoded",
+      "live": false
+    },
+    "6": {
+      "price": 3150,
+      "name": "Titanium Dioxide (rutile)",
+      "source": "hardcoded",
+      "live": false
+    },
+    "7": {
+      "price": 3650,
+      "name": "Zinc Dust (fine)",
+      "source": "hardcoded",
+      "live": false
+    },
+    "8": {
+      "price": 13488,
+      "name": "Cuprous Oxide (Cu2O)",
+      "source": "hardcoded",
+      "live": false
+    },
+    "9": {
+      "price": 1340,
+      "name": "Iron Oxide (red/yellow)",
+      "source": "hardcoded",
+      "live": false
+    },
+    "10": {
+      "price": 2482,
+      "name": "Zinc Phosphate",
+      "source": "hardcoded",
+      "live": false
+    },
+    "11": {
+      "price": 298,
+      "name": "Extenders (CaCO3/barytes)",
+      "source": "hardcoded",
+      "live": false
+    },
+    "12": {
+      "price": 1430,
+      "name": "Xylene (mixed)",
+      "source": "hardcoded",
+      "live": false
+    },
+    "13": {
+      "price": 1820,
+      "name": "MEK",
+      "source": "hardcoded",
+      "live": false
+    },
+    "14": {
+      "price": 1850,
+      "name": "Butyl Acetate",
+      "source": "hardcoded",
+      "live": false
+    },
+    "15": {
+      "price": 5400,
+      "name": "Isocyanate Hardener (HDI)",
+      "source": "hardcoded",
+      "live": false
+    },
+    "16": {
+      "price": 5100,
+      "name": "Rheology Modifiers",
+      "source": "hardcoded",
+      "live": false
+    },
+    "17": {
+      "price": 9200,
+      "name": "Co-Biocides (Zineb/ZPT)",
+      "source": "hardcoded",
+      "live": false
+    },
+    "18": {
+      "price": 114,
+      "name": "Steel Drums & Cans",
+      "source": "hardcoded",
+      "live": false
+    },
+    "19": {
+      "price": 195,
+      "name": "Freight & Shipping",
+      "source": "hardcoded",
+      "live": false
+    },
+    "20": {
+      "price": 138,
+      "name": "Industrial Energy",
+      "source": "hardcoded",
+      "live": false
+    },
+    "21": {
+      "price": 103.4,
+      "name": "Manufacturing Labour",
+      "source": "hardcoded",
+      "live": false
+    }
+  }
+}
