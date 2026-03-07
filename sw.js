@@ -25,18 +25,25 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  const url = new URL(e.request.url);
+
+  // Network-first for HTML navigation and prices.json (always get fresh data when online)
+  if (e.request.mode === 'navigate' || url.pathname.endsWith('/prices.json')) {
+    e.respondWith(
+      fetch(e.request).then(resp => {
+        const clone = resp.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        return resp;
+      }).catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // Cache-first for other assets
   e.respondWith(
     caches.match(e.request).then(cached => {
-      // Network-first for HTML (always get fresh data when online)
-      if (e.request.mode === 'navigate') {
-        return fetch(e.request).then(resp => {
-          const clone = resp.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
-          return resp;
-        }).catch(() => cached);
-      }
-      // Cache-first for everything else
-      return cached || fetch(e.request).then(resp => {
+      if (cached) return cached;
+      return fetch(e.request).then(resp => {
         const clone = resp.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
         return resp;
