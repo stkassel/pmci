@@ -2,7 +2,7 @@ name: Daily PWA Cache Refresh
 
 on:
   schedule:
-    - cron: '0 5 * * *'
+    - cron: '0 5 * * *'→ Runs at 05:00
   workflow_dispatch:
 
 permissions:
@@ -24,7 +24,7 @@ jobs:
 
       - name: Fetch live commodity prices
         env:
-          METALS_API_KEY: ${{ secrets.METALS_API_KEY }}
+          METALS_DEV_API_KEY: ${{ secrets.METALS_DEV_API_KEY }}
           EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
           BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
         run: python scripts/fetch-prices.py
