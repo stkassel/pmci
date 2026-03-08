@@ -1,35 +1,35 @@
 {
-  "updated": "2026-03-07",
-  "fetched_at": "2026-03-07T21:08:49.043514Z",
-  "live_count": 0,
+  "updated": "2026-03-08",
+  "fetched_at": "2026-03-08T02:07:30.033004Z",
+  "live_count": 12,
   "total_count": 21,
-  "wti_price": null,
+  "wti_price": 71.13,
   "lme_zinc": null,
   "lme_copper": null,
   "commodities": {
     "1": {
-      "price": 4250,
+      "price": 3741.61,
       "name": "Epoxy Resin (DGEBA)",
-      "source": "hardcoded",
-      "live": false
+      "source": "proxy:wti",
+      "live": true
     },
     "2": {
-      "price": 3350,
+      "price": 2949.27,
       "name": "Polyurethane Polyol",
-      "source": "hardcoded",
-      "live": false
+      "source": "proxy:wti",
+      "live": true
     },
     "3": {
-      "price": 2700,
+      "price": 2523.83,
       "name": "Alkyd Resin (long oil)",
-      "source": "hardcoded",
-      "live": false
+      "source": "proxy:wti",
+      "live": true
     },
     "4": {
-      "price": 3600,
+      "price": 3169.37,
       "name": "Acrylic Copolymer (SPC)",
-      "source": "hardcoded",
-      "live": false
+      "source": "proxy:wti",
+      "live": true
     },
     "5": {
       "price": 2050,
@@ -38,10 +38,10 @@
       "live": false
     },
     "6": {
-      "price": 3150,
+      "price": 2704.69,
       "name": "Titanium Dioxide (rutile)",
-      "source": "hardcoded",
-      "live": false
+      "source": "proxy:wti",
+      "live": true
     },
     "7": {
       "price": 3650,
@@ -74,28 +74,28 @@
       "live": false
     },
     "12": {
-      "price": 1430,
+      "price": 1165.64,
       "name": "Xylene (mixed)",
-      "source": "hardcoded",
-      "live": false
+      "source": "proxy:wti",
+      "live": true
     },
     "13": {
-      "price": 1820,
+      "price": 1483.54,
       "name": "MEK",
-      "source": "hardcoded",
-      "live": false
+      "source": "proxy:wti",
+      "live": true
     },
     "14": {
-      "price": 1850,
+      "price": 1507.99,
       "name": "Butyl Acetate",
-      "source": "hardcoded",
-      "live": false
+      "source": "proxy:wti",
+      "live": true
     },
     "15": {
-      "price": 5400,
+      "price": 4695.33,
       "name": "Isocyanate Hardener (HDI)",
-      "source": "hardcoded",
-      "live": false
+      "source": "proxy:wti",
+      "live": true
     },
     "16": {
       "price": 5100,
@@ -110,10 +110,10 @@
       "live": false
     },
     "18": {
-      "price": 114,
+      "price": 99.61,
       "name": "Steel Drums & Cans",
-      "source": "hardcoded",
-      "live": false
+      "source": "bls-ppi",
+      "live": true
     },
     "19": {
       "price": 195,
@@ -122,16 +122,16 @@
       "live": false
     },
     "20": {
-      "price": 138,
+      "price": 109.43,
       "name": "Industrial Energy",
-      "source": "hardcoded",
-      "live": false
+      "source": "eia-wti",
+      "live": true
     },
     "21": {
-      "price": 103.4,
+      "price": 2.11,
       "name": "Manufacturing Labour",
-      "source": "hardcoded",
-      "live": false
+      "source": "bls-eci",
+      "live": true
     }
   }
 }
