@@ -5,9 +5,10 @@ Fetches live commodity prices from free APIs and computes proxy prices
 for commodities without free data. Outputs data/prices.json.
 
 Free APIs:
-  - Metals-API (LME zinc, copper) — free tier: 50 req/month
-  - EIA Open Data (WTI crude oil) — free with API key
-  - BLS Public Data (PPI, ECI) — free, no key required
+  - Metals.Dev (LME zinc, copper) â free tier
+  - Yahoo Finance (WTI crude oil) â free, real-time data
+  - EIA Open Data (WTI crude oil) â free with API key, used as fallback
+  - BLS Public Data (PPI, ECI) â free, no key required
 
 Proxy pricing:
   - Petroleum-derived chemicals track WTI crude oil
@@ -30,7 +31,7 @@ except ImportError:
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-METALS_API_KEY = os.environ.get("METALS_API_KEY", "")
+METALS_DEV_API_KEY = os.environ.get("METALS_DEV_API_KEY", "")
 EIA_API_KEY = os.environ.get("EIA_API_KEY", "")
 
 OUTPUT_PATH = Path(__file__).resolve().parent.parent / "data" / "prices.json"
@@ -80,7 +81,7 @@ PROXY_OIL_BETA = {
 }
 
 # Zinc/Copper processing factors for direct metal pricing
-ZINC_DUST_PREMIUM = 1.30        # LME zinc × 1.30 ≈ zinc dust fine
+ZINC_DUST_PREMIUM = 1.30        # LME zinc Ã 1.30 â zinc dust fine
 CUPROUS_OXIDE_CU_CONTENT = 0.888
 CUPROUS_PROCESSING = 1.40       # Processing premium
 ZINC_PHOSPHATE_FACTOR = 0.68    # Tracks ~68% of zinc dust price
@@ -96,33 +97,32 @@ LME_COPPER_CRISIS_BASELINE = 10850  # USD/MT (approx LME copper early Mar 2026)
 # ---------------------------------------------------------------------------
 # API Fetchers
 # ---------------------------------------------------------------------------
-def fetch_metals_api():
-    """Fetch LME zinc and copper from Metals-API."""
+def fetch_metals_dev():
+    """Fetch LME zinc and copper from Metals.Dev API."""
     results = {"zinc_mt": None, "copper_mt": None}
 
-    if not METALS_API_KEY:
-        print("  WARN: METALS_API_KEY not set, skipping metals fetch")
+    if not METALS_DEV_API_KEY:
+        print("  WARN: METALS_DEV_API_KEY not set, skipping metals fetch")
         return results
 
     try:
-        url = f"https://metals-api.com/api/latest?access_key={METALS_API_KEY}&base=USD&symbols=LME-XZN,LME-XCU"
-        print(f"  Fetching Metals-API...")
+        url = f"https://api.metals.dev/v1/latest?api_key={METALS_DEV_API_KEY}&currency=USD&unit=mt"
+        print(f"  Fetching Metals.Dev...")
         resp = requests.get(url, timeout=15)
         data = resp.json()
 
-        if not data.get("success"):
-            print(f"  WARN: Metals-API error: {data.get('error', {}).get('info', 'unknown')}")
+        if data.get("status") != "success":
+            print(f"  WARN: Metals.Dev error: {data.get('status', 'unknown')}")
             return results
 
-        rates = data.get("rates", {})
-        TROY_OZ_PER_MT = 32150.7
+        metals = data.get("metals", {})
 
-        if "LME-XZN" in rates and rates["LME-XZN"] > 0:
-            results["zinc_mt"] = round(TROY_OZ_PER_MT / rates["LME-XZN"], 2)
+        if "lme_zinc" in metals and metals["lme_zinc"] is not None:
+            results["zinc_mt"] = round(metals["lme_zinc"], 2)
             print(f"  OK: LME Zinc: ${results['zinc_mt']}/MT")
 
-        if "LME-XCU" in rates and rates["LME-XCU"] > 0:
-            results["copper_mt"] = round(TROY_OZ_PER_MT / rates["LME-XCU"], 2)
+        if "lme_copper" in metals and metals["lme_copper"] is not None:
+            results["copper_mt"] = round(metals["lme_copper"], 2)
             print(f"  OK: LME Copper: ${results['copper_mt']}/MT")
 
     except Exception as e:
@@ -131,10 +131,41 @@ def fetch_metals_api():
     return results
 
 
+def fetch_yahoo_wti():
+    """Fetch latest WTI crude oil futures price from Yahoo Finance."""
+    try:
+        url = "https://query1.finance.yahoo.com/v8/finance/chart/CL=F?range=5d&interval=1d"
+        print(f"  Fetching Yahoo Finance WTI...")
+        resp = requests.get(url, timeout=15)
+        data = resp.json()
+
+        result = data.get("chart", {}).get("result", [])
+        if not result:
+            print(f"  WARN: No Yahoo Finance data returned")
+            return None
+
+        close_prices = result[0].get("indicators", {}).get("quote", [{}])[0].get("close", [])
+
+        # Get most recent non-null closing price
+        for price in reversed(close_prices):
+            if price is not None:
+                wti = float(price)
+                print(f"  OK: WTI ${wti}/bbl (from Yahoo Finance)")
+                return wti
+
+        print(f"  WARN: No valid WTI price in Yahoo Finance data")
+        return None
+
+    except Exception as e:
+        print(f"  ERROR fetching Yahoo Finance: {e}")
+
+    return None
+
+
 def fetch_eia_wti():
     """Fetch latest WTI crude oil spot price from EIA API v2."""
     if not EIA_API_KEY:
-        print("  WARN: EIA_API_KEY not set, skipping energy fetch")
+        print("  WARN: EIA_API_KEY not set, skipping EIA energy fetch")
         return None
 
     try:
@@ -147,17 +178,17 @@ def fetch_eia_wti():
             f"&sort[0][column]=period&sort[0][direction]=desc"
             f"&length=5"
         )
-        print(f"  Fetching EIA WTI crude...")
+        print(f"  Fetching EIA WTI crude (fallback)...")
         resp = requests.get(url, timeout=15)
         data = resp.json()
 
         records = data.get("response", {}).get("data", [])
         if records:
             wti = float(records[0]["value"])
-            print(f"  OK: WTI ${wti}/bbl ({records[0]['period']})")
+            print(f"  OK: WTI ${wti}/bbl ({records[0]['period']}) from EIA")
             return wti
         else:
-            print(f"  WARN: No WTI data returned")
+            print(f"  WARN: No WTI data returned from EIA")
 
     except Exception as e:
         print(f"  ERROR fetching EIA: {e}")
@@ -203,13 +234,13 @@ def fetch_bls_data():
                 ppi_base = 310.0
                 steel_index = round((value / ppi_base) * 100.5, 2)
                 results["18"] = steel_index
-                print(f"  OK: PPI Fabricated Metal: {value} ({period}) → Index: {steel_index}")
+                print(f"  OK: PPI Fabricated Metal: {value} ({period}) â Index: {steel_index}")
 
             elif "CIU2020" in sid:
                 eci_base = 155.0
                 labour_index = round((value / eci_base) * 99.27, 2)
                 results["21"] = labour_index
-                print(f"  OK: ECI Manufacturing: {value} ({period}) → Index: {labour_index}")
+                print(f"  OK: ECI Manufacturing: {value} ({period}) â Index: {labour_index}")
 
     except Exception as e:
         print(f"  ERROR fetching BLS: {e}")
@@ -259,12 +290,12 @@ def calc_oil_proxies(wti_price):
         if beta is None or beta == 0:
             continue
 
-        # Proxy formula: new_price = base × (1 + beta × (oil_ratio - 1))
+        # Proxy formula: new_price = base Ã (1 + beta Ã (oil_ratio - 1))
         # If oil drops 10% and beta=0.85, price drops 8.5%
         adjustment = 1 + beta * (oil_ratio - 1)
         new_price = round(info["price"] * adjustment, 2)
         results[cid] = new_price
-        print(f"  #{cid:>2} {info['name']:<30}: ${info['price']:>8} → ${new_price:>8} (beta={beta}, adj={adjustment:.3f})")
+        print(f"  #{cid:>2} {info['name']:<30}: ${info['price']:>8} â ${new_price:>8} (beta={beta}, adj={adjustment:.3f})")
 
     return results
 
@@ -292,7 +323,7 @@ def load_existing():
 
 
 def main():
-    print(f"PMCI Price Fetcher — {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
+    print(f"PMCI Price Fetcher â {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
     print("=" * 60)
 
     # Start with hardcoded values
@@ -307,10 +338,20 @@ def main():
 
     # --- Fetch live data ---
     print("\n[1/3] Metals (LME Zinc, Copper)...")
-    metals_raw = fetch_metals_api()
+    metals_raw = fetch_metals_dev()
 
-    print("\n[2/3] Energy (EIA WTI Crude)...")
-    wti_price = fetch_eia_wti()
+    print("\n[2/3] Energy (WTI Crude)...")
+    # Try Yahoo Finance first for more current data, fall back to EIA
+    wti_price = fetch_yahoo_wti()
+    if wti_price is None:
+        print("  Yahoo Finance WTI fetch failed, trying EIA...")
+        wti_price = fetch_eia_wti()
+    else:
+        # If Yahoo succeeded, also try EIA to compare freshness
+        eia_wti = fetch_eia_wti()
+        if eia_wti is not None and eia_wti > wti_price:
+            print(f"  EIA WTI (${eia_wti}) higher than Yahoo (${wti_price}), using EIA")
+            wti_price = eia_wti
 
     print("\n[3/3] BLS (PPI Steel, ECI Labour)...")
     bls = fetch_bls_data()
