@@ -1,32 +1,32 @@
 {
-  "updated": "2026-03-11",
-  "fetched_at": "2026-03-11T05:40:39.540361Z",
+  "updated": "2026-03-12",
+  "fetched_at": "2026-03-12T05:42:15.875413Z",
   "live_count": 16,
   "total_count": 21,
-  "wti_price": 71.13,
-  "lme_zinc": 3366,
-  "lme_copper": 13025,
+  "wti_price": 94.65,
+  "lme_zinc": 3305,
+  "lme_copper": 12950,
   "commodities": {
     "1": {
-      "price": 3741.61,
+      "price": 4346.43,
       "name": "Epoxy Resin (DGEBA)",
       "source": "proxy:wti",
       "live": true
     },
     "2": {
-      "price": 2949.27,
+      "price": 3426.01,
       "name": "Polyurethane Polyol",
       "source": "proxy:wti",
       "live": true
     },
     "3": {
-      "price": 2523.83,
+      "price": 2733.42,
       "name": "Alkyd Resin (long oil)",
       "source": "proxy:wti",
       "live": true
     },
     "4": {
-      "price": 3169.37,
+      "price": 3681.68,
       "name": "Acrylic Copolymer (SPC)",
       "source": "proxy:wti",
       "live": true
@@ -38,19 +38,19 @@
       "live": false
     },
     "6": {
-      "price": 2704.69,
+      "price": 3234.47,
       "name": "Titanium Dioxide (rutile)",
       "source": "proxy:wti",
       "live": true
     },
     "7": {
-      "price": 4375.8,
+      "price": 4296.5,
       "name": "Zinc Dust (fine)",
       "source": "lme-zinc",
       "live": true
     },
     "8": {
-      "price": 16192.68,
+      "price": 16099.44,
       "name": "Cuprous Oxide (Cu2O)",
       "source": "lme-copper",
       "live": true
@@ -62,7 +62,7 @@
       "live": false
     },
     "10": {
-      "price": 2975.54,
+      "price": 2921.62,
       "name": "Zinc Phosphate",
       "source": "lme-zinc",
       "live": true
@@ -74,25 +74,25 @@
       "live": false
     },
     "12": {
-      "price": 1165.64,
+      "price": 1480.14,
       "name": "Xylene (mixed)",
       "source": "proxy:wti",
       "live": true
     },
     "13": {
-      "price": 1483.54,
+      "price": 1883.82,
       "name": "MEK",
       "source": "proxy:wti",
       "live": true
     },
     "14": {
-      "price": 1507.99,
+      "price": 1914.87,
       "name": "Butyl Acetate",
       "source": "proxy:wti",
       "live": true
     },
     "15": {
-      "price": 4695.33,
+      "price": 5533.66,
       "name": "Isocyanate Hardener (HDI)",
       "source": "proxy:wti",
       "live": true
@@ -104,7 +104,7 @@
       "live": false
     },
     "17": {
-      "price": 9748.46,
+      "price": 9688.5,
       "name": "Co-Biocides (Zineb/ZPT)",
       "source": "lme-zinc",
       "live": true
@@ -122,7 +122,7 @@
       "live": false
     },
     "20": {
-      "price": 109.43,
+      "price": 145.62,
       "name": "Industrial Energy",
       "source": "eia-wti",
       "live": true
