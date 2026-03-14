@@ -5,10 +5,10 @@ Fetches live commodity prices from free APIs and computes proxy prices
 for commodities without free data. Outputs data/prices.json.
 
 Free APIs:
-  - Metals.Dev (LME zinc, copper) â free tier
-  - Yahoo Finance (WTI crude oil) â free, real-time data
-  - EIA Open Data (WTI crude oil) â free with API key, used as fallback
-  - BLS Public Data (PPI, ECI) â free, no key required
+  - Metals.Dev (LME zinc, copper) — free tier
+  - Yahoo Finance (WTI crude oil) — free, real-time data
+  - EIA Open Data (WTI crude oil) — free with API key, used as fallback
+  - BLS Public Data (PPI, ECI) — free, no key required
 
 Proxy pricing:
   - Petroleum-derived chemicals track WTI crude oil
@@ -81,7 +81,7 @@ PROXY_OIL_BETA = {
 }
 
 # Zinc/Copper processing factors for direct metal pricing
-ZINC_DUST_PREMIUM = 1.30        # LME zinc Ã 1.30 â zinc dust fine
+ZINC_DUST_PREMIUM = 1.30        # LME zinc × 1.30 ≈ zinc dust fine
 CUPROUS_OXIDE_CU_CONTENT = 0.888
 CUPROUS_PROCESSING = 1.40       # Processing premium
 ZINC_PHOSPHATE_FACTOR = 0.68    # Tracks ~68% of zinc dust price
@@ -132,11 +132,32 @@ def fetch_metals_dev():
 
 
 def fetch_yahoo_wti():
-    """Fetch latest WTI crude oil futures price from Yahoo Finance."""
+    """Fetch latest WTI crude oil futures price from Yahoo Finance via yfinance."""
+    # Method 1: yfinance package (handles auth/cookies automatically)
+    try:
+        import yfinance as yf
+        print(f"  Fetching Yahoo Finance WTI (yfinance)...")
+        ticker = yf.Ticker("CL=F")
+        hist = ticker.history(period="5d")
+        if not hist.empty:
+            wti = round(float(hist["Close"].dropna().iloc[-1]), 2)
+            print(f"  OK: WTI ${wti}/bbl (from Yahoo Finance)")
+            return wti
+        print(f"  WARN: yfinance returned empty data")
+    except ImportError:
+        print(f"  WARN: yfinance not installed, trying raw API...")
+    except Exception as e:
+        print(f"  WARN: yfinance failed: {e}, trying raw API...")
+
+    # Method 2: Raw Yahoo Finance API with proper headers
     try:
         url = "https://query1.finance.yahoo.com/v8/finance/chart/CL=F?range=5d&interval=1d"
-        print(f"  Fetching Yahoo Finance WTI...")
-        resp = requests.get(url, timeout=15)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "application/json",
+        }
+        print(f"  Fetching Yahoo Finance WTI (raw API)...")
+        resp = requests.get(url, headers=headers, timeout=15)
         data = resp.json()
 
         result = data.get("chart", {}).get("result", [])
@@ -146,11 +167,10 @@ def fetch_yahoo_wti():
 
         close_prices = result[0].get("indicators", {}).get("quote", [{}])[0].get("close", [])
 
-        # Get most recent non-null closing price
         for price in reversed(close_prices):
             if price is not None:
-                wti = float(price)
-                print(f"  OK: WTI ${wti}/bbl (from Yahoo Finance)")
+                wti = round(float(price), 2)
+                print(f"  OK: WTI ${wti}/bbl (from Yahoo Finance raw API)")
                 return wti
 
         print(f"  WARN: No valid WTI price in Yahoo Finance data")
@@ -234,13 +254,13 @@ def fetch_bls_data():
                 ppi_base = 310.0
                 steel_index = round((value / ppi_base) * 100.5, 2)
                 results["18"] = steel_index
-                print(f"  OK: PPI Fabricated Metal: {value} ({period}) â Index: {steel_index}")
+                print(f"  OK: PPI Fabricated Metal: {value} ({period}) → Index: {steel_index}")
 
             elif "CIU2020" in sid:
                 eci_base = 155.0
                 labour_index = round((value / eci_base) * 99.27, 2)
                 results["21"] = labour_index
-                print(f"  OK: ECI Manufacturing: {value} ({period}) â Index: {labour_index}")
+                print(f"  OK: ECI Manufacturing: {value} ({period}) → Index: {labour_index}")
 
     except Exception as e:
         print(f"  ERROR fetching BLS: {e}")
@@ -290,12 +310,12 @@ def calc_oil_proxies(wti_price):
         if beta is None or beta == 0:
             continue
 
-        # Proxy formula: new_price = base Ã (1 + beta Ã (oil_ratio - 1))
+        # Proxy formula: new_price = base × (1 + beta × (oil_ratio - 1))
         # If oil drops 10% and beta=0.85, price drops 8.5%
         adjustment = 1 + beta * (oil_ratio - 1)
         new_price = round(info["price"] * adjustment, 2)
         results[cid] = new_price
-        print(f"  #{cid:>2} {info['name']:<30}: ${info['price']:>8} â ${new_price:>8} (beta={beta}, adj={adjustment:.3f})")
+        print(f"  #{cid:>2} {info['name']:<30}: ${info['price']:>8} → ${new_price:>8} (beta={beta}, adj={adjustment:.3f})")
 
     return results
 
@@ -323,7 +343,7 @@ def load_existing():
 
 
 def main():
-    print(f"PMCI Price Fetcher â {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
+    print(f"PMCI Price Fetcher — {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
     print("=" * 60)
 
     # Start with hardcoded values
