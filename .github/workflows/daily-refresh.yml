@@ -1,16 +1,12 @@
 name: Daily PWA Cache Refresh
 
-
 on:
   schedule:
     - cron: '0 5 * * *'
-
   workflow_dispatch:
-
 
 permissions:
   contents: write
-
 
 jobs:
   refresh-cache:
@@ -18,27 +14,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-
       - name: Install dependencies
         run: pip install requests yfinance
 
-
       - name: Fetch live commodity prices
         env:
+          COMMODITIES_API_KEY: ${{ secrets.COMMODITIES_API_KEY }}
           METALS_DEV_API_KEY: ${{ secrets.METALS_DEV_API_KEY }}
           EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
           BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
         run: python scripts/fetch-prices.py
-
 
       - name: Update service worker cache version
         run: |
           DATE=$(date +%Y%m%d)
           sed -i "s/const CACHE_NAME = '.*'/const CACHE_NAME = 'pmci-v1-$DATE'/" sw.js
           echo "Updated CACHE_NAME to pmci-v1-$DATE"
+
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/prices.json sw.js
+          git diff --staged --quiet || git commit -m "chore: daily price refresh $(date +%Y-%m-%d)"
+          git push
