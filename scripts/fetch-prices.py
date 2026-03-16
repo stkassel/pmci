@@ -11,10 +11,10 @@ Primary API:
   - Commodities-API.com (WTI, Brent, zinc, copper, aluminum, nickel, etc.)
 
 Fallback APIs:
-  - Metals.Dev     (LME zinc, copper)         — free tier
-  - Yahoo Finance  (WTI crude oil)             — free, real-time data
-  - EIA Open Data  (WTI crude oil)             — free with API key
-  - BLS Public Data (PPI, ECI)                 — free, no key required
+  - Metals.Dev     (LME zinc, copper)         â free tier
+  - Yahoo Finance  (WTI crude oil)             â free, real-time data
+  - EIA Open Data  (WTI crude oil)             â free with API key
+  - BLS Public Data (PPI, ECI)                 â free, no key required
 
 Proxy pricing:
   - Petroleum-derived chemicals track WTI crude oil
@@ -98,7 +98,7 @@ LME_ZINC_CRISIS_BASELINE  = 2808
 LME_COPPER_CRISIS_BASELINE = 10850
 
 # ---------------------------------------------------------------------------
-# Commodities-API.com symbols → PMCI commodity mapping
+# Commodities-API.com symbols â PMCI commodity mapping
 # ---------------------------------------------------------------------------
 # These are the symbols we request from Commodities-API.com
 # The API returns prices per unit in USD (rates are inverted: 1/rate = price)
@@ -140,23 +140,31 @@ def fetch_commodities_api():
         return results
 
     try:
-        symbols_str = ",".join(CAPI_SYMBOLS)
-        url = (
-            f"https://commodities-api.com/api/latest"
-            f"?access_key={COMMODITIES_API_KEY}"
-            f"&base=USD"
-            f"&symbols={symbols_str}"
-        )
-        print(f"  Fetching Commodities-API.com ({len(CAPI_SYMBOLS)} symbols)...")
-        resp = requests.get(url, timeout=30)
-        data = resp.json()
+        # Free tier limits symbols per request â batch into groups of 2
+        BATCH_SIZE = 2
+        all_rates = {}
+        for i in range(0, len(CAPI_SYMBOLS), BATCH_SIZE):
+            batch = CAPI_SYMBOLS[i:i + BATCH_SIZE]
+            symbols_str = ",".join(batch)
+            url = (
+                f"https://commodities-api.com/api/latest"
+                f"?access_key={COMMODITIES_API_KEY}"
+                f"&base=USD"
+                f"&symbols={symbols_str}"
+            )
+            print(f"  Fetching Commodities-API.com batch {i//BATCH_SIZE + 1}: {symbols_str}...")
+            resp = requests.get(url, timeout=30)
+            data = resp.json()
 
-        if not data.get("success"):
-            error = data.get("error", {})
-            print(f"  ERROR: Commodities-API.com: {error.get('info', error.get('type', 'unknown'))}")
-            return results
+            if not data.get("success"):
+                error = data.get("error", {})
+                print(f"  WARN: Batch {symbols_str} failed: {error.get('info', error.get('type', 'unknown'))}")
+                continue
 
-        rates = data.get("data", {}).get("rates", {})
+            batch_rates = data.get("data", {}).get("rates", {})
+            all_rates.update(batch_rates)
+
+        rates = all_rates
         if not rates:
             print("  WARN: Commodities-API.com returned no rates")
             return results
@@ -297,7 +305,7 @@ def fetch_eia_wti():
 
 
 # ---------------------------------------------------------------------------
-# BLS (PPI, ECI) — no equivalent on Commodities-API
+# BLS (PPI, ECI) â no equivalent on Commodities-API
 # ---------------------------------------------------------------------------
 def fetch_bls_data():
     """Fetch PPI (Steel) and ECI (Labour) from BLS Public Data API."""
@@ -403,7 +411,7 @@ def load_existing():
 
 
 def main():
-    print(f"PMCI Price Fetcher — {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
+    print(f"PMCI Price Fetcher â {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
     print("=" * 60)
 
     # Start with hardcoded values
@@ -419,7 +427,7 @@ def main():
     # -----------------------------------------------------------------------
     # [1/4] PRIMARY: Commodities-API.com
     # -----------------------------------------------------------------------
-    print("\n[1/4] PRIMARY — Commodities-API.com...")
+    print("\n[1/4] PRIMARY â Commodities-API.com...")
     capi = fetch_commodities_api()
 
     # Extract WTI and metals from Commodities-API
@@ -435,7 +443,7 @@ def main():
     # -----------------------------------------------------------------------
     # [2/4] FALLBACK: Metals (if Commodities-API missed zinc/copper)
     # -----------------------------------------------------------------------
-    print("\n[2/4] FALLBACK — Metals (Metals.Dev)...")
+    print("\n[2/4] FALLBACK â Metals (Metals.Dev)...")
     if zinc_mt is None or copper_mt is None:
         print("  Commodities-API missing metals, trying Metals.Dev fallback...")
         metals_fb = fetch_metals_dev()
@@ -453,7 +461,7 @@ def main():
     # -----------------------------------------------------------------------
     # [3/4] FALLBACK: WTI (if Commodities-API missed WTI)
     # -----------------------------------------------------------------------
-    print("\n[3/4] FALLBACK — WTI (Yahoo Finance / EIA)...")
+    print("\n[3/4] FALLBACK â WTI (Yahoo Finance / EIA)...")
     if wti_price is None:
         print("  Commodities-API missing WTI, trying Yahoo Finance fallback...")
         wti_price = fetch_yahoo_wti()
@@ -472,7 +480,7 @@ def main():
             print(f"  NOTE: EIA WTI (${eia_wti}) higher than CAPI (${wti_price})")
 
     # -----------------------------------------------------------------------
-    # [4/4] BLS (PPI Steel, ECI Labour) — no Commodities-API equivalent
+    # [4/4] BLS (PPI Steel, ECI Labour) â no Commodities-API equivalent
     # -----------------------------------------------------------------------
     print("\n[4/4] BLS (PPI Steel, ECI Labour)...")
     bls = fetch_bls_data()
