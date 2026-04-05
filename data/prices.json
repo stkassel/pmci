@@ -1,9 +1,9 @@
 {
-  "updated": "2026-04-04",
-  "fetched_at": "2026-04-04T05:47:56.569939Z",
+  "updated": "2026-04-05",
+  "fetched_at": "2026-04-05T06:08:03.462105Z",
   "live_count": 16,
   "total_count": 21,
-  "wti_price": 111.54,
+  "wti_price": 112.06,
   "brent_price": null,
   "lme_zinc": 3236,
   "lme_copper": 12236,
@@ -15,25 +15,25 @@
   },
   "commodities": {
     "1": {
-      "price": 4780.76,
+      "price": 4794.13,
       "name": "Epoxy Resin (DGEBA)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "2": {
-      "price": 3768.36,
+      "price": 3778.9,
       "name": "Polyurethane Polyol",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "3": {
-      "price": 2883.92,
+      "price": 2888.55,
       "name": "Alkyd Resin (long oil)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "4": {
-      "price": 4049.58,
+      "price": 4060.91,
       "name": "Acrylic Copolymer (SPC)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
@@ -45,7 +45,7 @@
       "live": false
     },
     "6": {
-      "price": 3614.91,
+      "price": 3626.62,
       "name": "Titanium Dioxide (rutile)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
@@ -81,25 +81,25 @@
       "live": false
     },
     "12": {
-      "price": 1705.99,
+      "price": 1712.95,
       "name": "Xylene (mixed)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "13": {
-      "price": 2171.27,
+      "price": 2180.12,
       "name": "MEK",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "14": {
-      "price": 2207.06,
+      "price": 2216.05,
       "name": "Butyl Acetate",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "15": {
-      "price": 6135.68,
+      "price": 6154.22,
       "name": "Isocyanate Hardener (HDI)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
@@ -129,7 +129,7 @@
       "live": false
     },
     "20": {
-      "price": 171.6,
+      "price": 172.4,
       "name": "Industrial Energy",
       "source": "wti-energy(yahoo-finance)",
       "live": true
