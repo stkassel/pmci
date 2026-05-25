@@ -1,17 +1,17 @@
 {
-  "updated": "2026-05-24",
-  "fetched_at": "2026-05-24T07:44:26.131204Z",
-  "live_count": 16,
+  "updated": "2026-05-25",
+  "fetched_at": "2026-05-25T08:49:13.108458Z",
+  "live_count": 12,
   "total_count": 21,
   "wti_price": 96.6,
   "brent_price": null,
-  "lme_zinc": 3548,
-  "lme_copper": 13600,
+  "lme_zinc": null,
+  "lme_copper": null,
   "data_sources": {
     "primary": "commodities-api.com",
     "wti_source": "yahoo-finance",
-    "zinc_source": "metals-dev",
-    "copper_source": "metals-dev"
+    "zinc_source": "commodities-api",
+    "copper_source": "commodities-api"
   },
   "commodities": {
     "1": {
@@ -51,16 +51,16 @@
       "live": true
     },
     "7": {
-      "price": 4612.4,
+      "price": 3650,
       "name": "Zinc Dust (fine)",
-      "source": "lme-zinc(metals-dev)",
-      "live": true
+      "source": "hardcoded",
+      "live": false
     },
     "8": {
-      "price": 16907.52,
+      "price": 13488,
       "name": "Cuprous Oxide (Cu2O)",
-      "source": "lme-copper(metals-dev)",
-      "live": true
+      "source": "hardcoded",
+      "live": false
     },
     "9": {
       "price": 1340,
@@ -69,10 +69,10 @@
       "live": false
     },
     "10": {
-      "price": 3136.43,
+      "price": 2482,
       "name": "Zinc Phosphate",
-      "source": "lme-zinc(metals-dev)",
-      "live": true
+      "source": "hardcoded",
+      "live": false
     },
     "11": {
       "price": 298,
@@ -111,10 +111,10 @@
       "live": false
     },
     "17": {
-      "price": 9927.35,
+      "price": 9200,
       "name": "Co-Biocides (Zineb/ZPT)",
-      "source": "lme-zinc(metals-dev)",
-      "live": true
+      "source": "hardcoded",
+      "live": false
     },
     "18": {
       "price": 101.11,
