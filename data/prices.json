@@ -1,9 +1,9 @@
 {
-  "updated": "2026-08-09",
-  "fetched_at": "2026-08-09T05:38:53.502578Z",
-  "live_count": 14,
+  "updated": "2026-08-10",
+  "fetched_at": "2026-08-10T06:04:36.897345Z",
+  "live_count": 16,
   "total_count": 21,
-  "wti_price": 78.18,
+  "wti_price": 77.93,
   "brent_price": null,
   "lme_zinc": 3732,
   "lme_copper": 14092,
@@ -15,25 +15,25 @@
   },
   "commodities": {
     "1": {
-      "price": 3922.9,
+      "price": 3916.48,
       "name": "Epoxy Resin (DGEBA)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "2": {
-      "price": 3092.17,
+      "price": 3087.1,
       "name": "Polyurethane Polyol",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "3": {
-      "price": 2586.65,
+      "price": 2584.43,
       "name": "Alkyd Resin (long oil)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "4": {
-      "price": 3322.93,
+      "price": 3317.49,
       "name": "Acrylic Copolymer (SPC)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
@@ -45,7 +45,7 @@
       "live": false
     },
     "6": {
-      "price": 2863.49,
+      "price": 2857.85,
       "name": "Titanium Dioxide (rutile)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
@@ -81,25 +81,25 @@
       "live": false
     },
     "12": {
-      "price": 1259.91,
+      "price": 1256.57,
       "name": "Xylene (mixed)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "13": {
-      "price": 1603.52,
+      "price": 1599.27,
       "name": "MEK",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "14": {
-      "price": 1629.95,
+      "price": 1625.63,
       "name": "Butyl Acetate",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "15": {
-      "price": 4946.61,
+      "price": 4937.7,
       "name": "Isocyanate Hardener (HDI)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
@@ -117,10 +117,10 @@
       "live": true
     },
     "18": {
-      "price": 114,
+      "price": 101.76,
       "name": "Steel Drums & Cans",
-      "source": "hardcoded",
-      "live": false
+      "source": "bls-ppi",
+      "live": true
     },
     "19": {
       "price": 195,
@@ -129,16 +129,16 @@
       "live": false
     },
     "20": {
-      "price": 120.28,
+      "price": 119.89,
       "name": "Industrial Energy",
       "source": "wti-energy(yahoo-finance)",
       "live": true
     },
     "21": {
-      "price": 103.4,
+      "price": 1.99,
       "name": "Manufacturing Labour",
-      "source": "hardcoded",
-      "live": false
+      "source": "bls-eci",
+      "live": true
     }
   }
 }
