@@ -1,12 +1,12 @@
 {
-  "updated": "2026-08-24",
-  "fetched_at": "2026-08-24T05:27:34.766551Z",
+  "updated": "2026-08-25",
+  "fetched_at": "2026-08-25T05:21:25.712155Z",
   "live_count": 16,
   "total_count": 21,
-  "wti_price": 85.63,
+  "wti_price": 85.05,
   "brent_price": null,
-  "lme_zinc": 3824,
-  "lme_copper": 14235,
+  "lme_zinc": 3840,
+  "lme_copper": 14245,
   "data_sources": {
     "primary": "commodities-api.com",
     "wti_source": "yahoo-finance",
@@ -15,25 +15,25 @@
   },
   "commodities": {
     "1": {
-      "price": 4114.48,
+      "price": 4099.57,
       "name": "Epoxy Resin (DGEBA)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "2": {
-      "price": 3243.18,
+      "price": 3231.42,
       "name": "Polyurethane Polyol",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "3": {
-      "price": 2653.04,
+      "price": 2647.87,
       "name": "Alkyd Resin (long oil)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "4": {
-      "price": 3485.21,
+      "price": 3472.57,
       "name": "Acrylic Copolymer (SPC)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
@@ -45,19 +45,19 @@
       "live": false
     },
     "6": {
-      "price": 3031.29,
+      "price": 3018.23,
       "name": "Titanium Dioxide (rutile)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "7": {
-      "price": 4971.2,
+      "price": 4992.0,
       "name": "Zinc Dust (fine)",
       "source": "lme-zinc(metals-dev)",
       "live": true
     },
     "8": {
-      "price": 17696.95,
+      "price": 17709.38,
       "name": "Cuprous Oxide (Cu2O)",
       "source": "lme-copper(metals-dev)",
       "live": true
@@ -69,7 +69,7 @@
       "live": false
     },
     "10": {
-      "price": 3380.42,
+      "price": 3394.56,
       "name": "Zinc Phosphate",
       "source": "lme-zinc(metals-dev)",
       "live": true
@@ -81,25 +81,25 @@
       "live": false
     },
     "12": {
-      "price": 1359.53,
+      "price": 1351.77,
       "name": "Xylene (mixed)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "13": {
-      "price": 1730.31,
+      "price": 1720.44,
       "name": "MEK",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "14": {
-      "price": 1758.83,
+      "price": 1748.8,
       "name": "Butyl Acetate",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
     },
     "15": {
-      "price": 5212.16,
+      "price": 5191.49,
       "name": "Isocyanate Hardener (HDI)",
       "source": "proxy:wti(yahoo-finance)",
       "live": true
@@ -111,7 +111,7 @@
       "live": false
     },
     "17": {
-      "price": 10198.63,
+      "price": 10214.36,
       "name": "Co-Biocides (Zineb/ZPT)",
       "source": "lme-zinc(metals-dev)",
       "live": true
@@ -129,7 +129,7 @@
       "live": false
     },
     "20": {
-      "price": 131.74,
+      "price": 130.85,
       "name": "Industrial Energy",
       "source": "wti-energy(yahoo-finance)",
       "live": true
