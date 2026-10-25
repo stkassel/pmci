@@ -1,7 +1,7 @@
 {
-  "updated": "2026-10-24",
-  "fetched_at": "2026-10-24T09:11:12.339459Z",
-  "live_count": 16,
+  "updated": "2026-10-25",
+  "fetched_at": "2026-10-25T09:28:18.971631Z",
+  "live_count": 14,
   "total_count": 21,
   "wti_price": 103.27,
   "brent_price": null,
@@ -117,10 +117,10 @@
       "live": true
     },
     "18": {
-      "price": 103.84,
+      "price": 114,
       "name": "Steel Drums & Cans",
-      "source": "bls-ppi",
-      "live": true
+      "source": "hardcoded",
+      "live": false
     },
     "19": {
       "price": 195,
@@ -135,10 +135,10 @@
       "live": true
     },
     "21": {
-      "price": 1.99,
+      "price": 103.4,
       "name": "Manufacturing Labour",
-      "source": "bls-eci",
-      "live": true
+      "source": "hardcoded",
+      "live": false
     }
   }
 }
