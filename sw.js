@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pmci-v1-20261025';
+const CACHE_NAME = 'pmci-v1-20261026';
 const ASSETS = [
   './',
   './index.html',
